@@ -36,11 +36,14 @@ void draw() {
 
   // Set a random square size for this run
   int squareWidth = cellWidth;
-  squareWidth -= (int) random(2, 5);
+  squareWidth -= (int) random(0, 2);
 
   // Draw the grid of squares
   for (int col = 0; col < 5; col++) {
     for (int row = 0; row < 5; row ++) {
+      
+      // Rotate each square just a touch
+      float angle = random(-3, 3);
 
       // Determine the color for this square
       int divisor = (int) random(3, 5);
@@ -56,10 +59,10 @@ void draw() {
       int xOffset = (int) random(-10, 10);
       int yOffset = (int) random(-10, 10);
 
-
       // Position the origin and draw the square
       pushMatrix();
       translate(cellWidth / 2 + row * cellWidth + 25 + xOffset, cellWidth / 2 + col * cellWidth + 25 + yOffset);
+      rotate(radians(angle));
       rect(0, 0, squareWidth, squareWidth);
       popMatrix();
     }
