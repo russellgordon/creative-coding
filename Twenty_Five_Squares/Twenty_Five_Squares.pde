@@ -1,3 +1,5 @@
+int numFrames = 5;
+
 // This runs once
 void setup() {
 
@@ -47,7 +49,7 @@ void draw() {
         fill(10, 83, 32, 75);
       } else {
         // Reddish fill
-        fill(5, 92, 72, 90);
+        fill(5, 92, 72, 75);
       }
       
       // Pick a random x and y offset for each square
@@ -61,5 +63,11 @@ void draw() {
       rect(0, 0, squareWidth, squareWidth);
       popMatrix();
     }
+  }
+  
+  // Save each frame
+  saveFrame("f###.gif");
+  if (frameCount == numFrames) {
+    exit();
   }
 } //end of draw 
