@@ -1,6 +1,10 @@
+// Variables declared before setup() have global scope (can be used anywhere below)
+
 // Will store width of a cell in the grid
-// Variable has global scope (can be used anywhere below)
 int cellWidth = 0;
+
+// Will store actual size of square (slightly smaller than cell)
+int squareWidth = cellWidth;
 
 // This runs once
 void setup() {
@@ -35,14 +39,19 @@ void setup() {
 
 // This loops forever
 void draw() {
+  
+  // Set a random square size for this run
+  squareWidth = cellWidth;
+  squareWidth -= (int) random(5, 10);
 
-  background(180); // clear the screen to grey
+  // Reset background
+  background(0, 0, 80);
   
   for (int col = 0; col < 5; col++) {
     for (int row = 0; row < 5; row ++) {
        pushMatrix();
-       translate(row * cellWidth, col * cellWidth);
-       rect(0, 0, cellWidth, cellWidth);
+       translate(row * cellWidth + (cellWidth - squareWidth) / 2, col * cellWidth + (cellWidth - squareWidth) / 2);
+       rect(0, 0, squareWidth, squareWidth);
        popMatrix();
     }
   } 
