@@ -1,4 +1,6 @@
-int numFrames = 5;
+// Variables declare here have global scope (can be used anywhere)
+int numFrames = 5; // number of frames to be placed in animated gif
+int colorBase = 2; // Set the color base (0 = red, 1 = green, 2 = blue)
 
 // This runs once
 void setup() {
@@ -21,7 +23,6 @@ void setup() {
 
   // Seed random number generator
   randomSeed(hour() + minute() + second() + millis());
-
 }
 
 // This loops forever
@@ -41,7 +42,7 @@ void draw() {
   // Draw the grid of squares
   for (int col = 0; col < 5; col++) {
     for (int row = 0; row < 5; row ++) {
-      
+
       // Rotate each square just a touch
       float angle = random(-3, 3);
 
@@ -49,12 +50,12 @@ void draw() {
       int divisor = (int) random(3, 5);
       if ((col * row * 4) % divisor == 0) {
         // Duller reddish fill, 75% opaque
-        fill(10, 83, 32, 75);
+        fill(10 + 120 * colorBase, 83, 32, 75);
       } else {
         // Reddish fill
-        fill(5, 92, 72, 75);
+        fill(5 + 120 * colorBase, 92, 72, 75);
       }
-      
+
       // Pick a random x and y offset for each square
       int xOffset = (int) random(-10, 10);
       int yOffset = (int) random(-10, 10);
@@ -67,7 +68,7 @@ void draw() {
       popMatrix();
     }
   }
-  
+
   // Save each frame
   saveFrame("f###.gif");
   if (frameCount == numFrames) {
