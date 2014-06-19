@@ -1,22 +1,8 @@
-// Variables declared before setup() have global scope (can be used anywhere below)
-
-// Will store width of a cell in the grid
-int cellWidth = 0;
-
-// Will store actual size of square (slightly smaller than cell)
-int squareWidth = cellWidth;
-
-// Will store amound of rotation for each square
-float angle = 0;
-
-// Will be used to determine brighter squares
-int divisor = 0;
-
 // This runs once
 void setup() {
 
   // Set canvas size
-  size(600, 600);
+  size(650, 650);
 
   // Draw rectangles from top-left corner
   rectMode(CENTER);
@@ -34,8 +20,6 @@ void setup() {
   // Seed random number generator
   randomSeed(hour() + minute() + second() + millis());
 
-  // Calculate width of cell, and size of square within cell   
-  cellWidth = width / 5;
 }
 
 // This loops forever
@@ -44,18 +28,20 @@ void draw() {
   // Reset background
   background(0, 0, 90);
 
+  // Calculate width of cell
+  // 25 pixel boundary around drawing  
+  int cellWidth = (width - 50) / 5;
+
   // Set a random square size for this run
-  squareWidth = cellWidth;
-  squareWidth -= (int) random(0, 2);
-  
+  int squareWidth = cellWidth;
+  squareWidth -= (int) random(2, 5);
+
   // Draw the grid of squares
   for (int col = 0; col < 5; col++) {
     for (int row = 0; row < 5; row ++) {
-      // Set a bit of rotation for this square
-      angle = random(-10, 10);
 
       // Determine the color for this square
-      divisor = (int) random(3, 5);
+      int divisor = (int) random(3, 5);
       if ((col * row * 4) % divisor == 0) {
         // Duller reddish fill, 75% opaque
         fill(10, 83, 32, 75);
@@ -63,12 +49,15 @@ void draw() {
         // Reddish fill
         fill(5, 92, 72, 90);
       }
+      
+      // Pick a random x and y offset for each square
+      int xOffset = (int) random(-10, 10);
+      int yOffset = (int) random(-10, 10);
 
 
       // Position the origin and draw the square
       pushMatrix();
-      translate(cellWidth / 2 + row * cellWidth, cellWidth / 2 + col * cellWidth);
-      rotate(radians(angle));
+      translate(cellWidth / 2 + row * cellWidth + 25 + xOffset, cellWidth / 2 + col * cellWidth + 25 + yOffset);
       rect(0, 0, squareWidth, squareWidth);
       popMatrix();
     }
