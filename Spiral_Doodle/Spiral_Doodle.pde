@@ -64,7 +64,7 @@ void draw() {
     
     // Find co-ordinates for point to draw
     x = (radius + map(noise(perlinPosition[(int) ((i-1)*10)]), 0, 1, 0, 5))*i*cos(radians(angle));
-    y = radius*i*sin(radians(angle));
+    y = (radius + map(noise(perlinPosition[(int) ((i-1)*10)]), 0, 1, 0, 5))*i*sin(radians(angle));
 
     // Change brightness of fill and stroke
     fill(0, 0, i*50);
