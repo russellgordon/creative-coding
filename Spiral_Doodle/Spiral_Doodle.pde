@@ -6,9 +6,9 @@ float radius = 0.0;
 // Angle for circle
 float angle = 0.0;
 
-// Co-ordinates for a point
-float x = 0.0;
-float y = 0.0;
+// Co-ordinates for prior point
+float priorX = 0.0;
+float priorY = 0.0;
 
 float[] perlinPosition = new float[10];
 float xIncrement = 0.17;
@@ -54,7 +54,7 @@ void draw() {
   radius+=0.01;
 
   // Increase the angle 
-  angle += 0.2;
+  angle += 1;
 
   // Draw a series of 10 spirals
   for (float i = 1; i < 2; i+=0.1) {
@@ -63,15 +63,19 @@ void draw() {
     perlinPosition[(int) ((i-1)*10)] += xIncrement; 
     
     // Find co-ordinates for point to draw
-    x = (radius + map(noise(perlinPosition[(int) ((i-1)*10)]), 0, 1, 0, 5))*i*cos(radians(angle));
-    y = (radius + map(noise(perlinPosition[(int) ((i-1)*10)]), 0, 1, 0, 5))*i*sin(radians(angle));
+    float x = (radius + map(noise(perlinPosition[(int) ((i-1)*10)]), 0, 1, 0, 5))*i*cos(radians(angle));
+    float y = (radius + map(noise(perlinPosition[(int) ((i-1)*10)]), 0, 1, 0, 5))*i*sin(radians(angle));
 
     // Change brightness of fill and stroke
-    fill(0, 0, i*50);
     stroke(0, 0, i*50);
+    strokeWeight(1);
 
-    // Draw a point at the determined position
-    ellipse(x, y, 1, 1);
+    // Draw a line from priorX to new X
+    line(priorX, priorY, x, y);
+    
+    // Update prior x and y values
+    priorX = x;
+    priorY = y;
   }
 
 }
