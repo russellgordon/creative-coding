@@ -72,8 +72,8 @@ void draw() {
     constrainToSurface(x, y, dx, dy, i);
 
     // Further from centre, more faint
-    float transparency = dist(x[i], y[i], width/2, height/2);
-    transparency = 100 - map(transparency, 0, dist(0, height/2, width/2, height/2), 0, 100);
+    float transparency = dist(x[i], y[i], width/2, height/2); // distance of element from middle of image
+    transparency = 100 - map(transparency, 0, dist(0, height/2, width/2, height/2), 0, 100); // transparency based on a radius / circular boundary
     println(transparency);
     noStroke();
     fill(0, transparency);
