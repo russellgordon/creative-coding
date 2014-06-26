@@ -30,7 +30,7 @@ void setup() {
   size(400, 400);
 
   // number of elements
-  int num = 10;
+  int num = 50;
 
   // initialize arrays
   x = new float[num];
@@ -52,25 +52,32 @@ void setup() {
   // background
   background(255);
 
-  // black, no border for element
-  noStroke();
-  fill(0);
-
   // smoother lines
   smooth(2);
 }
 
 void draw() {
 
-
-  // initalize elements
+  // update elements on screen
   for (int i = 0; i < x.length; i++) {
 
     // Change position of element
     x[i] += dx[i];
     y[i] += dy[i];
 
+    // Further from centre, more faint
+    float transparency = dist(x[i], y[i], width/2, height/2);
+    transparency = 100 - map(transparency, 0, dist(0, 0, width/2, height/2), 0, 100);
+    println(transparency);
+    noStroke();
+    fill(0, transparency);
+
     // Draw element on screen
     ellipse(x[i], y[i], 2, 2);
+  }
+
+  // Save frames every so often
+  if (frameCount % 10 == 0) {
+    saveFrame("output-#######.png");
   }
 }
