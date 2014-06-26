@@ -23,7 +23,7 @@
 
 float x[], y[];      // position
 float dx[], dy[];    // change in position
-float diameters[];       // radius of each element
+float diameters[];       // diameters of each element
 
 boolean captureOutput = true; // whether to save GIF files for output
 int captureInterval = 500;
@@ -31,7 +31,6 @@ int captureInterval = 500;
 boolean fadeAtEdge = false; // whether to make elements transparent at edges
 
 boolean drawElements = false; // whether to actually draw the elements
-
 
 void setup() {
 
@@ -73,13 +72,6 @@ void setup() {
 }
 
 void draw() {
-
-  // slowly fade the image over time
-//  if (frameCount % 100 == 0) {
-//    noStroke();
-//    fill(255, 5);
-//    rect(0, 0, width, height);
-//  }
 
   // update elements on screen
   for (int i = 0; i < x.length; i++) {
