@@ -21,38 +21,56 @@
  * centres, colouring the line based on the circle being odd or even.
  */
 
-float x, y;      // position
-float dx, dy;    // change in position
+float x[], y[];      // position
+float dx[], dy[];    // change in position
 
 void setup() {
-  
+
   // create canvas
-  size(800, 800);
-  
-  // initial position
-  x = width/2;
-  y = height/2;
-  
-  // initial direction
-  dx = random(-1, 1);
-  dy = random(-1, 1);
-  
+  size(400, 400);
+
+  // number of elements
+  int num = 10;
+
+  // initialize arrays
+  x = new float[num];
+  y = new float[num];
+  dx = new float[num];
+  dy = new float[num];
+
+  // initalize elements
+  for (int i = 0; i < x.length; i++) {
+    // initial position
+    x[i] = width/2;
+    y[i] = height/2;
+
+    // initial direction
+    dx[i] = random(-1, 1);
+    dy[i] = random(-1, 1);
+  }
+
   // background
   background(255);
-  
+
   // black, no border for element
   noStroke();
   fill(0);
-  
+
+  // smoother lines
+  smooth(2);
 }
 
 void draw() {
-  
-  // Change position of element
-  x += dx;
-  y += dy;
-  
-  // Draw element on screen
-  ellipse(x, y, 2, 2);
-  
+
+
+  // initalize elements
+  for (int i = 0; i < x.length; i++) {
+
+    // Change position of element
+    x[i] += dx[i];
+    y[i] += dy[i];
+
+    // Draw element on screen
+    ellipse(x[i], y[i], 2, 2);
+  }
 }
