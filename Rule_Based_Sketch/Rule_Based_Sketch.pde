@@ -23,58 +23,63 @@
 
 float x[], y[];      // position
 float dx[], dy[];    // change in position
-float radii[];       // radius of each element
+float diameters[];       // radius of each element
 
 boolean captureOutput = true; // whether to save GIF files for output
-int captureInterval = 100;
+int captureInterval = 500;
 
 boolean fadeAtEdge = false; // whether to make elements transparent at edges
+
+boolean drawElements = false; // whether to actually draw the elements
 
 
 void setup() {
 
   // create canvas
-  size(400, 400);
+  size(800, 800);
 
   // number of elements
-  int num = 10;
+  int num = 256;
 
   // initialize arrays
   x = new float[num];
   y = new float[num];
   dx = new float[num];
   dy = new float[num];
-  radii = new float[num];
+  diameters = new float[num];
 
   // initalize elements
   for (int i = 0; i < x.length; i++) {
     // initial position
-    x[i] = width/2;
-    y[i] = height/2;
+    x[i] = random(0, width);
+    y[i] = random(0, height);
 
     // initial direction
     dx[i] = random(-1, 1);
     dy[i] = random(-1, 1);
 
     // radius of each element
-    radii[i] = random(1, width/5);
+    diameters[i] = random(width/num, width/(num/2));
   }
 
   // background
   background(255);
+
+  // border thickness
+  strokeWeight(1);
 
   // smoother lines
   smooth(2);
 }
 
 void draw() {
-  
+
   // slowly fade the image over time
-  if (frameCount % 100 == 0) {
-    noStroke();
-    fill(255, 5);
-    rect(0, 0, width, height);
-  }
+//  if (frameCount % 100 == 0) {
+//    noStroke();
+//    fill(255, 5);
+//    rect(0, 0, width, height);
+//  }
 
   // update elements on screen
   for (int i = 0; i < x.length; i++) {
@@ -87,17 +92,41 @@ void draw() {
     constrainToSurface(x, y, dx, dy, i);
 
     // Further from centre, more faint
-    float transparency = 75;
+    float transparency = 5;
     if (fadeAtEdge) {
       transparency = dist(x[i], y[i], width/2, height/2); // distance of element from middle of image
       transparency = 100 - map(transparency, 0, dist(0, height/2, width/2, height/2), 0, 100); // transparency based on a radius / circular boundary
     }
-    strokeWeight(1);
-    stroke(0, transparency);
-    noFill();
 
-    // Draw element on screen
-    ellipse(x[i], y[i], radii[i], radii[i]);
+    // Implement process 0
+    // We must check the position of the current element against all other elements on the screen
+    for (int j = 0; j < x.length; j++) {
+
+      // Don't check an element against itself
+      if (i == j) {
+        continue;
+      }
+
+      // Check distance from other elements – if circles overlap, draw the line connecting them
+      if ( (diameters[i]/2 + diameters[j]/2) > dist(x[i], y[i], x[j], y[j])) {
+        // Different colour depending on whether current element is even or odd
+        if (j % 2 == 0) {
+          stroke(255, 126, 0, 90); // orange
+        } else {
+          stroke(44, 208, 255, 90); // blue
+        }
+        line(x[i], y[i], x[j], y[j]);
+      }
+    }
+
+    // Draw elements
+    if (drawElements) {
+      stroke(0, transparency);
+      noFill();
+
+      // Draw element on screen
+      ellipse(x[i], y[i], diameters[i], diameters[i]);
+    }
   }
 
   // Save frames every so often
@@ -119,15 +148,15 @@ void constrainToSurface(float[] x, float[] y, float[] dx, float[] dy, int i) {
 
   // constrain horizontally
   if (x[i] + dx[i] > width) {    // right boundary
-    dx[i] = random(-1, -0.01);
+    dx[i] = random(-1, -0.25);
   } else if (x[i] + dx[i] < 0) { // left boundary
-    dx[i] = random(0.01, 1);
+    dx[i] = random(0.25, 1);
   }
 
   // constrain vertically
   if (y[i] + dy[i] > height) {    // bottom boundary
-    dy[i] = random(-1, -0.01);
+    dy[i] = random(-1, -0.25);
   } else if (y[i] + dy[i] < 0) { // top boundary
-    dy[i] = random(0.01, 1);
+    dy[i] = random(0.25, 1);
   }
 }
