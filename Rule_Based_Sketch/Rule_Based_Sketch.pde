@@ -23,9 +23,13 @@
 
 float x[], y[];      // position
 float dx[], dy[];    // change in position
+float radii[];       // radius of each element
 
 boolean captureOutput = true; // whether to save GIF files for output
-int captureInterval = 25;
+int captureInterval = 100;
+
+boolean fadeAtEdge = false; // whether to make elements transparent at edges
+
 
 void setup() {
 
@@ -33,13 +37,14 @@ void setup() {
   size(400, 400);
 
   // number of elements
-  int num = 25;
+  int num = 10;
 
   // initialize arrays
   x = new float[num];
   y = new float[num];
   dx = new float[num];
   dy = new float[num];
+  radii = new float[num];
 
   // initalize elements
   for (int i = 0; i < x.length; i++) {
@@ -50,6 +55,9 @@ void setup() {
     // initial direction
     dx[i] = random(-1, 1);
     dy[i] = random(-1, 1);
+
+    // radius of each element
+    radii[i] = random(1, width/5);
   }
 
   // background
@@ -60,6 +68,13 @@ void setup() {
 }
 
 void draw() {
+  
+  // slowly fade the image over time
+  if (frameCount % 100 == 0) {
+    noStroke();
+    fill(255, 5);
+    rect(0, 0, width, height);
+  }
 
   // update elements on screen
   for (int i = 0; i < x.length; i++) {
@@ -67,19 +82,22 @@ void draw() {
     // Change position of element
     x[i] += dx[i];
     y[i] += dy[i];
-    
+
     // Check for boundary
     constrainToSurface(x, y, dx, dy, i);
 
     // Further from centre, more faint
-    float transparency = dist(x[i], y[i], width/2, height/2); // distance of element from middle of image
-    transparency = 100 - map(transparency, 0, dist(0, height/2, width/2, height/2), 0, 100); // transparency based on a radius / circular boundary
-    println(transparency);
-    noStroke();
-    fill(0, transparency);
+    float transparency = 75;
+    if (fadeAtEdge) {
+      transparency = dist(x[i], y[i], width/2, height/2); // distance of element from middle of image
+      transparency = 100 - map(transparency, 0, dist(0, height/2, width/2, height/2), 0, 100); // transparency based on a radius / circular boundary
+    }
+    strokeWeight(1);
+    stroke(0, transparency);
+    noFill();
 
     // Draw element on screen
-    ellipse(x[i], y[i], 2, 2);
+    ellipse(x[i], y[i], radii[i], radii[i]);
   }
 
   // Save frames every so often
@@ -98,7 +116,7 @@ void draw() {
 //                  dy[]     A reference to an array containing vertical change values for all elements
 //                  i        What element to check the position of
 void constrainToSurface(float[] x, float[] y, float[] dx, float[] dy, int i) {
-  
+
   // constrain horizontally
   if (x[i] + dx[i] > width) {    // right boundary
     dx[i] = random(-1, -0.01);
