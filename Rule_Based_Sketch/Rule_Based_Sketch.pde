@@ -24,7 +24,8 @@
 float x[], y[];      // position
 float dx[], dy[];    // change in position
 
-boolean captureOutput = false; // whether to save GIF files for output
+boolean captureOutput = true; // whether to save GIF files for output
+int captureInterval = 25;
 
 void setup() {
 
@@ -32,7 +33,7 @@ void setup() {
   size(400, 400);
 
   // number of elements
-  int num = 1;
+  int num = 25;
 
   // initialize arrays
   x = new float[num];
@@ -82,7 +83,7 @@ void draw() {
   }
 
   // Save frames every so often
-  if (frameCount % 10 == 0 && captureOutput == true) {
+  if (frameCount % captureInterval == 0 && captureOutput == true) {
     saveFrame("output-#######.gif");
   }
 }
