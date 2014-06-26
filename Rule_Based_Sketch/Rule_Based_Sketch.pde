@@ -24,13 +24,15 @@
 float x[], y[];      // position
 float dx[], dy[];    // change in position
 
+boolean captureOutput = false; // whether to save GIF files for output
+
 void setup() {
 
   // create canvas
   size(400, 400);
 
   // number of elements
-  int num = 50;
+  int num = 1;
 
   // initialize arrays
   x = new float[num];
@@ -64,10 +66,13 @@ void draw() {
     // Change position of element
     x[i] += dx[i];
     y[i] += dy[i];
+    
+    // Check for boundary
+    constrainToSurface(x, y, dx, dy, i);
 
     // Further from centre, more faint
     float transparency = dist(x[i], y[i], width/2, height/2);
-    transparency = 100 - map(transparency, 0, dist(0, 0, width/2, height/2), 0, 100);
+    transparency = 100 - map(transparency, 0, dist(0, height/2, width/2, height/2), 0, 100);
     println(transparency);
     noStroke();
     fill(0, transparency);
@@ -77,7 +82,33 @@ void draw() {
   }
 
   // Save frames every so often
-  if (frameCount % 10 == 0) {
-    saveFrame("output-#######.png");
+  if (frameCount % 10 == 0 && captureOutput == true) {
+    saveFrame("output-#######.gif");
+  }
+}
+
+// constrainToSurface
+// 
+// Purpose: Ensure that an element does not go off the screen
+//
+// Parameters:      x[]      A reference to an array containing x values for all elements
+//                  y[]      A reference to an array containing y values for all elements
+//                  dx[]     A reference to an array containing horizontal change values for all elements
+//                  dy[]     A reference to an array containing vertical change values for all elements
+//                  i        What element to check the position of
+void constrainToSurface(float[] x, float[] y, float[] dx, float[] dy, int i) {
+  
+  // constrain horizontally
+  if (x[i] + dx[i] > width) {    // right boundary
+    dx[i] = random(-1, -0.01);
+  } else if (x[i] + dx[i] < 0) { // left boundary
+    dx[i] = random(0.01, 1);
+  }
+
+  // constrain vertically
+  if (y[i] + dy[i] > height) {    // bottom boundary
+    dy[i] = random(-1, -0.01);
+  } else if (y[i] + dy[i] < 0) { // top boundary
+    dy[i] = random(0.01, 1);
   }
 }
