@@ -25,7 +25,7 @@ float x[], y[];      // position
 float dx[], dy[];    // change in position
 float diameters[];       // diameters of each element
 
-boolean captureOutput = true; // whether to save GIF files for output
+boolean captureOutput = false; // whether to save GIF files for output
 int captureInterval = 500;
 
 boolean fadeAtEdge = false; // whether to make elements transparent at edges
@@ -38,7 +38,7 @@ void setup() {
   size(800, 800);
 
   // number of elements
-  int num = 256;
+  int num = 4;
 
   // initialize arrays
   x = new float[num];
@@ -54,8 +54,8 @@ void setup() {
     y[i] = random(0, height);
 
     // initial direction
-    dx[i] = random(-1, 1);
-    dy[i] = random(-1, 1);
+    dx[i] = random(-2, 2);
+    dy[i] = random(-2, 2);
 
     // radius of each element
     diameters[i] = random(width/num, width/(num/2));
@@ -101,11 +101,17 @@ void draw() {
 
       // Check distance from other elements – if circles overlap, draw the line connecting them
       if ( (diameters[i]/2 + diameters[j]/2) > dist(x[i], y[i], x[j], y[j])) {
+        
+        float strokeTransparency = dist(x[i], y[i], x[j], y[j]);
+        strokeTransparency = 25 - map(strokeTransparency, 0, sqrt(width*width + height*height), 0, 25);
+        
         // Different colour depending on whether current element is even or odd
         if (j % 2 == 0) {
-          stroke(255, 126, 0, 90); // orange
+          stroke(255, strokeTransparency); // white
+          //stroke(255, 126, 0, strokeTransparency); // orange
         } else {
-          stroke(44, 208, 255, 90); // blue
+          stroke(0, strokeTransparency); // black
+          //stroke(44, 208, 255, strokeTransparency); // blue
         }
         line(x[i], y[i], x[j], y[j]);
       }
@@ -140,15 +146,15 @@ void constrainToSurface(float[] x, float[] y, float[] dx, float[] dy, int i) {
 
   // constrain horizontally
   if (x[i] + dx[i] > width) {    // right boundary
-    dx[i] = random(-1, -0.25);
+    dx[i] = random(-2, -0.25);
   } else if (x[i] + dx[i] < 0) { // left boundary
-    dx[i] = random(0.25, 1);
+    dx[i] = random(0.25, 2);
   }
 
   // constrain vertically
   if (y[i] + dy[i] > height) {    // bottom boundary
-    dy[i] = random(-1, -0.25);
+    dy[i] = random(-2, -0.25);
   } else if (y[i] + dy[i] < 0) { // top boundary
-    dy[i] = random(0.25, 1);
+    dy[i] = random(0.25, 2);
   }
 }
