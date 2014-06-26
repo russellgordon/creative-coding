@@ -69,7 +69,8 @@ void draw() {
   // As "top" approaches edge of canvas, lines are more opaque
   // In centre of canvas, lines are less opaque
   float transparency = dist(handX, handY, width/2, height/2);
-  transparency = map(transparency, 0, dist(0, 0, width/2, height/2), 0, 30);
+  transparency = map(transparency, 0, dist(0, 0, width/2, height/2), 0, 20);
+  println(transparency);
   stroke(255, transparency);
 
   line(bx, by, handX, handY);
