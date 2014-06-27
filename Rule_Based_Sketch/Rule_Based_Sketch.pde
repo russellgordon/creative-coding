@@ -38,7 +38,7 @@ void setup() {
   size(800, 800);
 
   // number of elements
-  int num = 8;
+  int num = 4;
 
   // initialize arrays
   x = new float[num];
@@ -46,32 +46,39 @@ void setup() {
   dx = new float[num];
   dy = new float[num];
   diameters = new float[num];
-  
+
   // initalize elements
   for (int i = 0; i < x.length; i++) {
     // initial position
-    x[i] = random(0, width);
-    y[i] = random(0, height);
+    x[i] = width/2;
+    y[i] = height/2;
 
     // initial direction
-    dx[i] = random(-2, 2);
-    dy[i] = random(-2, 2);
+    dx[i] = random(-1, 1);
+    dy[i] = random(-1, 1);
 
     // radius of each element
-    diameters[i] = random(width/num, width/(num/4));
+    diameters[i] = random(width/num, width/(num/2));
   }
 
   // background
-  background(255);
+  background(0);
 
   // border thickness
   strokeWeight(1);
 
   // smoother lines
-  smooth(2);
+  smooth(4);
 }
 
 void draw() {
+
+  // slowly fade the image over time
+//  if (frameCount % 100 == 0) {
+//    noStroke();
+//    fill(0, 5);
+//    rect(0, 0, width, height);
+//  }
 
   // update elements on screen
   for (int i = 0; i < x.length; i++) {
@@ -81,7 +88,7 @@ void draw() {
     y[i] += dy[i];
 
     // Check for boundary
-    constrainToSurface(x, y, dx, dy, i);
+    constrainToSurface(x, y, dx, dy, i, false);
 
     // Further from centre, more faint
     float transparency = 5;
@@ -101,10 +108,10 @@ void draw() {
 
       // Check distance from other elements – if circles overlap, draw the line connecting them
       if ( (diameters[i]/2 + diameters[j]/2) > dist(x[i], y[i], x[j], y[j])) {
-        
+
         float strokeTransparency = dist(x[i], y[i], x[j], y[j]);
         strokeTransparency = 25 - map(strokeTransparency, 0, sqrt(width*width + height*height), 0, 25);
-        
+
         // Different colour depending on whether current element is even or odd
         if (j % 2 == 0) {
           stroke(255, strokeTransparency); // white
@@ -142,19 +149,28 @@ void draw() {
 //                  dx[]     A reference to an array containing horizontal change values for all elements
 //                  dy[]     A reference to an array containing vertical change values for all elements
 //                  i        What element to check the position of
-void constrainToSurface(float[] x, float[] y, float[] dx, float[] dy, int i) {
+//                  box      box if true, circle if false  
+void constrainToSurface(float[] x, float[] y, float[] dx, float[] dy, int i, boolean box) {
 
-  // constrain horizontally
-  if (x[i] + dx[i] > width) {    // right boundary
-    dx[i] = random(-2, -0.25);
-  } else if (x[i] + dx[i] < 0) { // left boundary
-    dx[i] = random(0.25, 2);
-  }
+  if (box) {
+    // constrain horizontally
+    if (x[i] + dx[i] > width) {    // right boundary
+      dx[i] = random(-1, -0.25);
+    } else if (x[i] + dx[i] < 0) { // left boundary
+      dx[i] = random(0.25, 1);
+    }
 
-  // constrain vertically
-  if (y[i] + dy[i] > height) {    // bottom boundary
-    dy[i] = random(-2, -0.25);
-  } else if (y[i] + dy[i] < 0) { // top boundary
-    dy[i] = random(0.25, 2);
+    // constrain vertically
+    if (y[i] + dy[i] > height) {    // bottom boundary
+      dy[i] = random(-1, -0.25);
+    } else if (y[i] + dy[i] < 0) { // top boundary
+      dy[i] = random(0.25, 1);
+    }
+  } else {
+    // constrain inside circle
+    if ( dist(x[i], y[i], width/2, height/2) > (width/2) ) {
+      dx[i] = random(-1, 1);
+      dy[i] = random(-1, 1);
+    }
   }
 }
