@@ -65,7 +65,7 @@ void setup() {
   background(0);
 
   // border thickness
-  strokeWeight(1);
+  strokeWeight(4);
 
   // smoother lines
   smooth(4);
