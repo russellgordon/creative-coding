@@ -25,7 +25,7 @@ float x[], y[];      // position
 float dx[], dy[];    // change in position
 float diameters[];       // diameters of each element
 
-boolean captureOutput = false; // whether to save GIF files for output
+boolean captureOutput = true; // whether to save GIF files for output
 int captureInterval = 500;
 
 boolean fadeAtEdge = false; // whether to make elements transparent at edges
@@ -38,7 +38,7 @@ void setup() {
   size(800, 800);
 
   // number of elements
-  int num = 4;
+  int num = 8;
 
   // initialize arrays
   x = new float[num];
@@ -46,7 +46,7 @@ void setup() {
   dx = new float[num];
   dy = new float[num];
   diameters = new float[num];
-
+  
   // initalize elements
   for (int i = 0; i < x.length; i++) {
     // initial position
@@ -58,7 +58,7 @@ void setup() {
     dy[i] = random(-2, 2);
 
     // radius of each element
-    diameters[i] = random(width/num, width/(num/2));
+    diameters[i] = random(width/num, width/(num/4));
   }
 
   // background
