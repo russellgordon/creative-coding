@@ -65,7 +65,7 @@ void setup() {
   background(0);
 
   // border thickness
-  strokeWeight(4);
+  strokeWeight(3);
 
   // smoother lines
   smooth(4);
@@ -110,14 +110,16 @@ void draw() {
       if ( (diameters[i]/2 + diameters[j]/2) > dist(x[i], y[i], x[j], y[j])) {
 
         float strokeTransparency = dist(x[i], y[i], x[j], y[j]);
-        strokeTransparency = 25 - map(strokeTransparency, 0, sqrt(width*width + height*height), 0, 25);
+        strokeTransparency = 20 - map(strokeTransparency, 0, sqrt(width*width + height*height), 0, 20);
 
         // Different colour depending on whether current element is even or odd
         if (j % 2 == 0) {
-          stroke(255, strokeTransparency); // white
+          stroke(0, 60, 127, strokeTransparency); // darker blue
+          //stroke(255, strokeTransparency); // white
           //stroke(255, 126, 0, strokeTransparency); // orange
         } else {
-          stroke(0, strokeTransparency); // black
+          stroke(76, 161, 255, strokeTransparency); // darker blue
+          //stroke(0, strokeTransparency); // black
           //stroke(44, 208, 255, strokeTransparency); // blue
         }
         line(x[i], y[i], x[j], y[j]);
