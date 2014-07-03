@@ -47,16 +47,13 @@ void drawLayer(float diameter, float fromAngle, float toAngle) {
     fromAngle = tempAngle; 
   }
   
-  // Set radius
-  float radius = diameter / 2;
 
   // Draw the slice
   for (float angle = fromAngle; angle < toAngle; angle+=1) {
-    float xPos = radius*cos(radians(angle));
-    float yPos = radius*sin(radians(angle));
     
-    fill(angle, 100, 100);
-    ellipse(xPos, yPos, 2, 2);
+    // Set color and draw arc with this hue
+    stroke(angle, 100, 100);
+    arc(0, 0, diameter, diameter, radians(angle), radians(angle + 2));
     
   }
   
