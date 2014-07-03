@@ -17,10 +17,11 @@ void setup() {
 void draw() {
 
   // Draw an ellipse in middle of screen
-  translate(width/2, height/2);
+  translate(width/2, height/3);
   scale(1, -1);
-  //rotateX(radians(100));
-  drawLayer(width/4*3, 0, 360);
+  rotateX(radians(120));
+  scale(1, -1);
+  drawLayer(width/4*3, 0, 280);
 }
 
 // drawLayer
