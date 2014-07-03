@@ -182,8 +182,10 @@ void dotLine(float x1, float y1, float x2, float y2, int dotDetail) {
  *
  */
 void mousePressed() {
-  if (isWithinCircle(colorHandleX, colorHandleY, handleSize)) {
+  if (isWithinCircle(colorHandleX, colorHandleY, handleSize) && isLocked == false) {
     isLocked = true;
+  } else {
+    isLocked = false;
   }
 }
 
@@ -193,5 +195,4 @@ void mousePressed() {
  *
  */
 void mouseReleased() {
-  isLocked = false;
 }
