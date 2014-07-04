@@ -3,7 +3,7 @@
  *
  * Summary of licensing terms: http://creativecommons.org/licenses/by-sa/4.0/
  *
- * This work is published by Russell Gordon, from Toronto, Ontario, Canada.
+ * This work is published by Russell Gordon, from Toronto, Ontario, Canada.  July 2014.
  */
 
 /*
