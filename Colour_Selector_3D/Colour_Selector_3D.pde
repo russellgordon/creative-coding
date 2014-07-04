@@ -3,7 +3,9 @@ float h = 0;
 float s = 100;
 float b = 100;
 
-// Whether to adjust brightness
+// Whether to adjust each type of value
+boolean adjustHue = false;
+boolean adjustSaturation = false;
 boolean adjustBrightness = false;
 
 void setup() {
@@ -22,7 +24,7 @@ void draw() {
   // White background
   background(0, 0, 100);
 
-  // Set the table so that a cylinder can be viewed slightly from the side
+  // Transformations so that "cylinder" can be viewed slightly from the side
   translate(width/2, height/3, (100-b));
   scale(1, -1);
   rotateX(radians(120));
@@ -58,7 +60,7 @@ void drawMarker(boolean mainColour) {
   translate(0, 0, (100-b));  // make sure markers move if the brightness is changed
   rotate(radians(colour)); // rotate around centre of colour circle
   translate((height/4*3)/2 + 60, 0); // move origin to middle of marker circle
-  
+
   // keep handles "facing" viewer while they rotate
   rotateX(radians(90));  
   if ((colour > 0 && colour <= 90) || (colour > 270 && colour <= 360)) {
@@ -66,7 +68,7 @@ void drawMarker(boolean mainColour) {
   } else if ((colour > 90 && colour <= 180) || (colour > 180 && colour <= 270)) {
     rotateY(radians(90*sin(radians(colour))));
   }
-  
+
   // draw the actual marker
   ellipse(0, 0, 50, 50);
   popMatrix();
@@ -133,46 +135,59 @@ void mouseMoved() {
   float yPos = (mouseY - height/3 - (100-b))*-1;
 
   // Base hue on angle, calculated from current x, y position relative to centre of colour wheel
-  if (xPos > 150) {
-    xPos = 150;
-  }
-  if (yPos > 75) {
-    yPos = 75;
-  }
-  if (xPos < -150) {
-    xPos = -150;
-  }
-  if (yPos < -75) {
-    yPos = -75;
-  }
-  float hue = degrees(atan2(yPos, xPos));
-  if (hue < 0) {
-    h = 360 - abs(hue);
-  } else {
-    h = hue;
+  if (!adjustBrightness) {
+    if (xPos > 150) {
+      xPos = 150;
+    }
+    if (yPos > 75) {
+      yPos = 75;
+    }
+    if (xPos < -150) {
+      xPos = -150;
+    }
+    if (yPos < -75) {
+      yPos = -75;
+    }
+    if (adjustHue) {
+      float hue = degrees(atan2(yPos, xPos));
+      if (hue < 0) {
+        h = 360 - abs(hue);
+      } else {
+        h = hue;
+      }
+    }
   }
 
+
   // Base saturation on distance from centre of colour circle
-  float armLength = dist(xPos, yPos, 0, 0);
-  armLength = armLength / (0.5*abs(cos(radians(h))) + 0.5); // adjust for effect of tilted circle
-  if (armLength > 150) {
-    armLength = 150;
+  if (adjustSaturation) {
+    float armLength = dist(xPos, yPos, 0, 0);
+    armLength = armLength / (0.5*abs(cos(radians(h))) + 0.5); // adjust for effect of tilted circle
+    if (armLength > 150) {
+      armLength = 150;
+    }
+    s = map(armLength, 0, 150, 0, 100);
   }
-  println(armLength);
-  //s = 100;
-  s = map(armLength, 0, 150, 0, 100);
 }
 
 void keyPressed() {
 
   // Toggle for brightness adjustment; allow when Shift key is pressed
-  if (keyCode == SHIFT) {
-    adjustBrightness = true;
+  if (key == CODED) {
+    if (keyCode == SHIFT) {
+      adjustBrightness = true;
+    } else if (keyCode == CONTROL) {
+      adjustHue = true;
+    } else if (keyCode == ALT) {
+      adjustSaturation = true;
+    }
   }
 }
 
 void keyReleased() {
 
-  // When shift is not pressed, do not adjust the brightness
+  // When keys are not, do not adjust anything
+  adjustHue = false;
+  adjustSaturation = false;
   adjustBrightness = false;
 }
