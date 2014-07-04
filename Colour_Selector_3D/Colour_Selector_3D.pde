@@ -15,6 +15,8 @@ void setup() {
 
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
+  
+  textAlign(CENTER, CENTER);
 
   ortho();
 }
@@ -23,8 +25,9 @@ void draw() {
 
   // White background
   background(0, 0, 100);
-
+  
   // Transformations so that "cylinder" can be viewed slightly from the side
+  pushMatrix();
   translate(width/2, height/3, (100-b));
   scale(1, -1);
   rotateX(radians(120));
@@ -36,8 +39,20 @@ void draw() {
   popMatrix();
 
   // Draw the handles
+  pushMatrix();
   drawMarker(true); // main colour
   drawMarker(false);  // complementary colour
+  popMatrix();
+  
+  // Back to origin at top left
+  popMatrix();
+  
+  // Display current values
+  textSize(16);
+  fill(0, 0, 0);
+  stroke(0, 0, 0);
+  text("hue: " + round(h) + "  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0); 
+
 }
 
 // drawMarker
