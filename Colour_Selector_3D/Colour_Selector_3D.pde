@@ -53,7 +53,7 @@ boolean adjustBrightness = false;
 void setup() {
 
   // Create canvas
-  size(1200, 400, P3D);
+  size(1200, 500, P3D);
 
   // Reset variables
   h = 0;
@@ -85,13 +85,13 @@ void draw() {
 
   // Transformations so that "cylinder" can be viewed slightly from the side
   pushMatrix();
-  translate(width/2, height/3, (100-b));
+  translate(width/2, (height - 100)/3 + 100, (100-b));
   scale(1, -1);
   rotateX(radians(120));
   scale(1, -1);
 
   // Draw a "slice" of the colour cylinder
-  drawColourCylinderSlice(height/4*3, 0, 360);
+  drawColourCylinderSlice((height - 100)/4*3, 0, 360);
 
   // Draw a grey outline of the colour cylinder
   drawCylinderOutline();
@@ -110,6 +110,9 @@ void draw() {
 
   // Display saved HSB values
   displaySavedValues();
+  
+  // Draw the help text
+  drawHelpText();
 }
 
 // drawColourCylinderSlice
@@ -172,17 +175,19 @@ void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
 //
 void drawCylinderOutline() {
 
+  float cylinderWidth = (height - 100)/4*3+6;
+
   pushMatrix();
   strokeWeight(4);
   stroke(325);
   translate(0, 0, -1);
   noFill();
-  ellipse(0, 0, height/4*3+6, height/4*3+6); // top circle
+  ellipse(0, 0, cylinderWidth, cylinderWidth); // top circle
   translate(0, 0, 100);
-  ellipse(0, 0, height/4*3+6, height/4*3+6); // bottom circle
-  translate((height/4*3+6)/2, 0, 0);
+  ellipse(0, 0, cylinderWidth, cylinderWidth); // bottom circle
+  translate(cylinderWidth/2, 0, 0);
   line(0, 0, 0, 0, 0, -100); // right line
-  translate(-1*(height/4*3+6), 0, 0);
+  translate(-1*(cylinderWidth), 0, 0);
   line(0, 0, 0, 0, 0, -100); // right line
   popMatrix();
 }
@@ -205,7 +210,7 @@ void drawMarker(boolean mainColour) {
   fill(colour, s, b);
   translate(0, 0, (100-b));  // make sure markers move if the brightness is changed
   rotate(radians(colour)); // rotate around centre of colour circle
-  translate((height/4*3)/2 + 60, 0); // move origin to middle of marker circle
+  translate(((height - 100)/4*3)/2 + 60, 0); // move origin to middle of marker circle
 
   // keep handles "facing" viewer while they rotate
   rotateX(radians(90));  
@@ -248,7 +253,7 @@ void mouseMoved() {
 
   // Determine distance of mouse cursor from centre of circle
   float xPos = mouseX - width/2;
-  float yPos = (mouseY - height/3 - (100-b))*-1;
+  float yPos = (mouseY - ((height - 100)/3 + 100) - (100-b))*-1;
 
   // Base hue on angle, calculated from current x, y position relative to centre of colour wheel
   if (!adjustBrightness) {
@@ -350,7 +355,7 @@ void displaySavedValues() {
   float offset = 112.5;
 
   pushMatrix();
-  translate(25, -100, 0);
+  translate(25, 0, 0);
 
   // Determine how many palettes to show
   int displayMax = 0;
@@ -396,8 +401,34 @@ void displaySavedValues() {
     translate(offset, 50, 0); 
     text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
     translate(-1*offset, -50, 0);
-
   }
 
   popMatrix();
+}
+
+// drawHelpText
+//
+// Purpose: Draws the instructions on screen.
+//
+// Parameters:     (none)
+//
+void drawHelpText() {
+
+  // Box with light grey fill
+  noStroke();
+  fill(325); // pale yellow
+  rect(0, 0, width, 100);
+
+  // Separating line
+  stroke(250);
+  strokeWeight(2);
+  line(0, 100, width, 100);
+
+  // Help text
+  textAlign(CENTER, CENTER); // Text alignment for text boxes (centered vertically and horizontally)
+  textSize(18);
+  fill(0);
+  text("Press 'CONTROL' key and move mouse pointer around colour wheel to adjust hue.", width/2, 20);
+  text("Press 'ALT' key and move to and from center of colour wheel to adjust saturation.", width/2, 45);
+  text("Press 'SHIFT' and move up/down to adjust brightness.  Click mouse button to save colours.  'R' to reset.", width/2, 70);
 }
