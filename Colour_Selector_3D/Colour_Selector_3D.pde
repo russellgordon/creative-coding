@@ -1,3 +1,38 @@
+/*
+ * This work is published under the Creative Commons ShareAlike 4.0 International License.
+ *
+ * Summary of licensing terms: http://creativecommons.org/licenses/by-sa/4.0/
+ *
+ * This work is published by Russell Gordon, from Toronto, Ontario, Canada.
+ */
+
+/*
+ * PURPOSE
+ *
+ * This is a complementary colour selection tool, based on the Hue-Saturation-Brightness colour model.
+ *
+ * A static summary of how colours are selected using this model is available here:
+ *
+ * https://twitter.com/rgordon/status/406373396939673602/photo/1
+ *
+ * The "main" colour follows the position of the mouse; the complementary colour appears on the opposite side
+ * of the colour wheel.
+ *
+ *
+ * NOTES ON USE
+ *
+ * Press the CONTROL key, then move around the colour wheel to change the hue of the main colour.
+ *
+ * Press the ALT key, then move toward or away from the centre of the colour wheel to change the saturation of the main colour.
+ * 
+ * Press the SHIFT key, then move up or down on the screen to change the brightness of the main colour. 
+ *
+ * Click the mouse button to store a pair of complementary colours.
+ *
+ * You can store up to six colour pairs before the first pair is replaced.
+ *
+ */
+
 // Variables to control colour of markers
 float h = 0;
 float s = 100;
@@ -16,10 +51,10 @@ void setup() {
 
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
-  
+
   // Text alignment for text boxes (centered vertically and horizontally)
   textAlign(CENTER, CENTER);
-  
+
   // Smoothness of drawing
   smooth(2);
 
@@ -32,7 +67,7 @@ void draw() {
 
   // White background
   background(0, 0, 100);
-  
+
   // Transformations so that "cylinder" can be viewed slightly from the side
   pushMatrix();
   translate(width/2, height/3, (100-b));
@@ -42,22 +77,21 @@ void draw() {
 
   // Draw a "slice" of the colour cylinder
   drawColourCylinderSlice(height/4*3, 0, 360);
-  
+
   // Draw a grey outline of the colour cylinder
   drawCylinderOutline();
-  
+
   // Draw the markers
   pushMatrix();
   drawMarker(true); // main colour
   drawMarker(false);  // complementary colour
   popMatrix();
-  
+
   // Back to origin at top left
   popMatrix();
-  
+
   // Display current HSB values
   displayValues();
-
 }
 
 // drawColourCylinderSlice
@@ -108,9 +142,8 @@ void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
       arc(0, 0, currentDiameter, currentDiameter, radians(angle), radians(angle + 3));
     }
   }
-  
-  popMatrix();
 
+  popMatrix();
 }
 
 // drawCylinderOutline
@@ -134,7 +167,6 @@ void drawCylinderOutline() {
   translate(-1*(height/4*3+6), 0, 0);
   line(0, 0, 0, 0, 0, -100); // right line
   popMatrix();
-
 }
 
 // drawMarker
@@ -181,7 +213,7 @@ void displayValues() {
   textSize(16);
   fill(0, 0, 0);
   stroke(0, 0, 0);
-  text("hue: " + round(h) + "\u00B0  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0); 
+  text("hue: " + round(h) + "\u00B0  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0);
 }
 
 // mouseMoved
