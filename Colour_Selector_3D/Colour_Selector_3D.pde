@@ -3,23 +3,27 @@ float h = 0;
 float s = 100;
 float b = 100;
 
+// Whether to adjust brightness
+boolean adjustBrightness = false;
+
 void setup() {
 
   // Create canvas
-  size(600, 400, P3D);
+  size(1000, 400, P3D);
 
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
+
+  ortho();
 }
 
 void draw() {
 
-  noLights();
   // White background
   background(0, 0, 100);
 
   // Set the table so that a cylinder can be viewed slightly from the side
-  translate(width/2, height/3);
+  translate(width/2, height/3, (100-b));
   scale(1, -1);
   rotateX(radians(120));
   scale(1, -1);
@@ -29,19 +33,45 @@ void draw() {
   drawColourCylinder(height/4*3, 0, 360);
   popMatrix();
 
-  // Change the hue
-  h+=1;
-  if (h > 360) {
-    h = 0;
-  }
+  //  // Change the hue
+  //  h+=1;
+  //  if (h > 360) {
+  //    h = 0;
+  //  }
 
-  // Draw the handle
+  // Draw the handles
+  drawMarker(true); // main colour
+  drawMarker(false);  // complementary colour
+}
+
+// drawMarker
+//
+// Purpose: Draws the main and complementary markers
+//
+// Parameters:      diameter    How large the cylinder should be, across.
+//                  fromAngle   Hue at which to start drawing a slice.
+//                  toAngle     Hue at which to finish drawing a slice.
+void drawMarker(boolean mainColour) {
+
+  float colour = h;
+  if (!mainColour) {
+    colour = (h + 180) % 360;
+  }
+  pushMatrix();
   strokeWeight(1.5);
   stroke(250);
-  fill(h, s, b);
-  translate(0, 0, (100-b));
-  rotate(radians(h));
-  ellipse((height/4*3)/2 + 40, 0, 25, 25);
+  fill(colour, s, b);
+  translate(0, 0, (100-b));  // make sure markers move if the brightness is changed
+  rotate(radians(colour)); // rotate around centre of colour circle
+  translate((height/4*3)/2 + 60, 0); // move origin to middle of marker circle
+  rotateX(radians(h));  // keep handle colour mostly visible while it rotates
+  rotateY(radians(h));  // keep handle colour mostly visible while it rotates
+  if (mainColour) {
+    ellipse(0, 0, 50, 50); // draw the marker
+  } else {
+    ellipse(0, 0, 30, 30); // draw the complementary marker
+  }
+  popMatrix();
 }
 
 // drawColourCylinder
@@ -91,13 +121,51 @@ void drawColourCylinder(float diameter, float fromAngle, float toAngle) {
       arc(0, 0, currentDiameter, currentDiameter, radians(angle), radians(angle + 3));
     }
   }
-  println("done");
 }
 
 void mouseMoved() {
-   
-  println(mouseY);
-  b = map(mouseY, height, 0, 0, 100);
-  println(b);
-  
+
+  // Change brightness based on vertical mouse position
+  if (adjustBrightness) {
+    b = map(mouseY, height, 0, 0, 100);
+  }
+
+  // Base saturation on distance from centre of colour circle
+  float xPos = mouseX - width/2;
+  float yPos = (mouseY - height/3 - (100-b))*-1;
+  float armLength = dist(xPos, yPos, 0, 0);
+  s = map(armLength, 0, 150, 0, 100);
+
+  // Base hue on angle
+  if (xPos > 150) {
+    xPos = 150;
+  }
+  if (yPos > 150) {
+    xPos = 150;
+  }
+  if (xPos < -150) {
+    xPos = -150;
+  }
+  if (yPos < -150) {
+    xPos = -150;
+  }
+  float hue = degrees(atan2(yPos, xPos));
+  if (hue < 0) {
+    hue = 360 - abs(hue);
+  }
+  h = hue;
+}
+
+void keyPressed() {
+
+  // Toggle for brightness adjustment; allow when Shift key is pressed
+  if (keyCode == SHIFT) {
+    adjustBrightness = true;
+  }
+}
+
+void keyReleased() {
+
+  // When shift is not pressed, do not adjust the brightness
+  adjustBrightness = false;
 }
