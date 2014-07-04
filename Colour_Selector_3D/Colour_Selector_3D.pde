@@ -1,7 +1,7 @@
 void setup() {
 
   // Create canvas
-  size(500, 500, P3D);
+  size(1000, 800, P3D);
 
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
@@ -9,20 +9,19 @@ void setup() {
   // White background
   background(0, 0, 100);
 
-  // No borders
-  noStroke();
+  // No fill
+  noFill();
 
   // Draw an ellipse in middle of screen
   translate(width/2, height/3);
   scale(1, -1);
   rotateX(radians(120));
+  rotateZ(radians(30));
   scale(1, -1);
-  drawLayer(width/4*3, 0, 280);
-
+  drawLayer(height/4*3, 0, 300);
 }
 
 void draw() {
-
 }
 
 // drawLayer
@@ -53,18 +52,24 @@ void drawLayer(float diameter, float fromAngle, float toAngle) {
   }
 
 
-  // Draw the slice
-  for (float currentDiameter = diameter; currentDiameter > 0; currentDiameter -= diameter / 100) {
+  // Draw the cylinder
+  for (int brightness = 100; brightness > 0; brightness--) {
 
-    float saturation = map(currentDiameter, 0, diameter, 0, 100);
-    println(saturation);
+    // Move down a "slice" in the cylinder
+    translate(0, 0, (100-brightness)/25);
 
-    for (float angle = fromAngle; angle < toAngle; angle+=1) {
+    // Draw the current slice
+    for (float currentDiameter = diameter; currentDiameter > 0; currentDiameter -= diameter / 100) {
 
-      // Set color and draw arc with this hue
-      stroke(angle, saturation, 100);
-      strokeWeight(4);
-      arc(0, 0, currentDiameter, currentDiameter, radians(angle), radians(angle + 2));
+      float saturation = map(currentDiameter, 0, diameter, 0, 100);
+
+      for (float angle = fromAngle; angle < toAngle; angle+=1) {
+
+        // Set color and draw arc with this hue
+        stroke(angle, saturation, brightness);
+        strokeWeight(4);
+        arc(0, 0, currentDiameter, currentDiameter, radians(angle), radians(angle + 2));
+      }
     }
   }
   println("done");
