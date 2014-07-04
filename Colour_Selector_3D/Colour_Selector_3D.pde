@@ -1,4 +1,4 @@
-// Variables to control colour of selection circle
+// Variables to control colour of markers
 float h = 0;
 float s = 100;
 float b = 100;
@@ -8,6 +8,7 @@ boolean adjustHue = false;
 boolean adjustSaturation = false;
 boolean adjustBrightness = false;
 
+// This runs once only.
 void setup() {
 
   // Create canvas
@@ -16,11 +17,14 @@ void setup() {
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
   
+  // Text alignment for text boxes (centered vertically and horizontally)
   textAlign(CENTER, CENTER);
 
+  // Perspective mode
   ortho();
 }
 
+// This runs repeatedly, allowing for the animation to occur.
 void draw() {
 
   // White background
@@ -33,12 +37,10 @@ void draw() {
   rotateX(radians(120));
   scale(1, -1);
 
-  // Draw the cylinder
-  pushMatrix();
+  // Draw a "slice" of the colour cylinder
   drawColourCylinderSlice(height/4*3, 0, 360);
-  popMatrix();
 
-  // Draw the handles
+  // Draw the markers
   pushMatrix();
   drawMarker(true); // main colour
   drawMarker(false);  // complementary colour
@@ -47,11 +49,61 @@ void draw() {
   // Back to origin at top left
   popMatrix();
   
-  // Display current values
-  textSize(16);
-  fill(0, 0, 0);
-  stroke(0, 0, 0);
-  text("hue: " + round(h) + "  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0); 
+  // Display current HSB values
+  displayValues();
+
+}
+
+// drawColourCylinderSlice
+//
+// Purpose: Draws a "slice" of the HSB colour cylinder
+//
+// Parameters:      diameter    How large the cylinder should be, across.
+//                  fromAngle   Hue at which to start drawing a slice.
+//                  toAngle     Hue at which to finish drawing a slice.
+void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
+
+  pushMatrix();
+
+  // Sanity check: size of cylinder
+  diameter = abs(diameter);
+  if (diameter > width) {
+    diameter = width/4*3;
+  }
+  if (diameter < 100) {
+    diameter = 100;
+  }
+
+  // Sanity check: angles
+  fromAngle = abs(fromAngle);
+  toAngle = abs(toAngle);
+  if (toAngle < fromAngle) {
+    float tempAngle = toAngle;
+    toAngle = fromAngle;
+    fromAngle = tempAngle;
+  }
+
+  // Move down a "slice" in the cylinder
+  translate(0, 0, (100-b));
+
+  // Draw the current slice
+  for (float currentDiameter = diameter; currentDiameter >= 0; currentDiameter -= diameter / 75) {
+
+    float saturation = map(currentDiameter, 0, diameter, 0, 100);
+
+    for (float angle = fromAngle; angle < toAngle; angle+=1) {
+
+      // Only draw the edges of the cylinder for efficiency
+
+      // Set color and draw arc with this hue
+      fill(angle, saturation, b);
+      stroke(angle, saturation, b);
+      strokeWeight(4);
+      arc(0, 0, currentDiameter, currentDiameter, radians(angle), radians(angle + 3));
+    }
+  }
+  
+  popMatrix();
 
 }
 
@@ -59,9 +111,8 @@ void draw() {
 //
 // Purpose: Draws the main and complementary markers
 //
-// Parameters:      diameter    How large the cylinder should be, across.
-//                  fromAngle   Hue at which to start drawing a slice.
-//                  toAngle     Hue at which to finish drawing a slice.
+// Parameters:      mainColour    True when drawing the "main" colour, false when drawing the complementary colour.
+//
 void drawMarker(boolean mainColour) {
 
   float colour = h;
@@ -89,55 +140,24 @@ void drawMarker(boolean mainColour) {
   popMatrix();
 }
 
-// drawColourCylinderSlice
+
+// displayValues
 //
-// Purpose: Draws a "slice" of the HSB colour cylinder
+// Purpose: Display the hue, saturation, and brightness values on-screen.
 //
-// Parameters:      diameter    How large the cylinder should be, across.
-//                  fromAngle   Hue at which to start drawing a slice.
-//                  toAngle     Hue at which to finish drawing a slice.
-void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
-
-  // Sanity check: size of cylinder
-  diameter = abs(diameter);
-  if (diameter > width) {
-    diameter = width/4*3;
-  }
-  if (diameter < 100) {
-    diameter = 100;
-  }
-
-  // Sanity check: angles
-  fromAngle = abs(fromAngle);
-  toAngle = abs(toAngle);
-  if (toAngle < fromAngle) {
-    float tempAngle = toAngle;
-    toAngle = fromAngle;
-    fromAngle = tempAngle;
-  }
-
-
-  // Move down a "slice" in the cylinder
-  translate(0, 0, (100-b));
-
-  // Draw the current slice
-  for (float currentDiameter = diameter; currentDiameter >= 0; currentDiameter -= diameter / 75) {
-
-    float saturation = map(currentDiameter, 0, diameter, 0, 100);
-
-    for (float angle = fromAngle; angle < toAngle; angle+=1) {
-
-      // Only draw the edges of the cylinder for efficiency
-
-      // Set color and draw arc with this hue
-      fill(angle, saturation, b);
-      stroke(angle, saturation, b);
-      strokeWeight(4);
-      arc(0, 0, currentDiameter, currentDiameter, radians(angle), radians(angle + 3));
-    }
-  }
+// Parameters: none
+//
+void displayValues() {
+  textSize(16);
+  fill(0, 0, 0);
+  stroke(0, 0, 0);
+  text("hue: " + round(h) + "  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0); 
 }
 
+// mouseMoved
+//
+// Purpose: Built-in processing function used to track current mouse position.
+//
 void mouseMoved() {
 
   // Change brightness based on vertical mouse position
@@ -185,6 +205,10 @@ void mouseMoved() {
   }
 }
 
+// keyPressed
+//
+// Purpose: Built-in processing function used to track when a key is pressed on the keyboard
+//
 void keyPressed() {
 
   // Toggle for brightness adjustment; allow when Shift key is pressed
@@ -199,9 +223,13 @@ void keyPressed() {
   }
 }
 
+// keyReleased
+//
+// Purpose: Built-in processing function used to track when a key is pressed on the keyboard
+//
 void keyReleased() {
 
-  // When keys are not, do not adjust anything
+  // When keys are not pressed, do not adjust anything
   adjustHue = false;
   adjustSaturation = false;
   adjustBrightness = false;
