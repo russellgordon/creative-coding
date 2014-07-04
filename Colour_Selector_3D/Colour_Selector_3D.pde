@@ -53,7 +53,7 @@ boolean adjustBrightness = false;
 void setup() {
 
   // Create canvas
-  size(1000, 400, P3D);
+  size(1200, 400, P3D);
 
   // Reset variables
   h = 0;
@@ -64,9 +64,6 @@ void setup() {
 
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
-
-  // Text alignment for text boxes (centered vertically and horizontally)
-  textAlign(CENTER, CENTER);
 
   // Smoothness of drawing
   smooth(2);
@@ -231,7 +228,8 @@ void drawMarker(boolean mainColour) {
 // Parameters: none
 //
 void displayValues() {
-  textSize(16);
+  textAlign(CENTER, CENTER); // Text alignment for text boxes (centered vertically and horizontally)
+  textSize(24);
   fill(0, 0, 0);
   stroke(0, 0, 0);
   text("hue: " + round(h) + "\u00B0  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0);
@@ -348,6 +346,9 @@ void mousePressed() {
 //
 void displaySavedValues() {
 
+  textAlign(LEFT, CENTER); // Text alignment for text boxes (centered vertically and horizontally)
+  float offset = 112.5;
+
   pushMatrix();
   translate(25, -100, 0);
 
@@ -364,7 +365,9 @@ void displaySavedValues() {
 
     // Check if in second column
     if (i == hValues.length / 2) {
-      translate(850, -375, 0); // Reset for second column
+      translate(1050, -375, 0); // Reset for second column
+      textAlign(RIGHT, CENTER); // Text alignment for text boxes (centered vertically and horizontally)
+      offset = -12.5;
     }
     translate(0, 125, 0);
 
@@ -373,9 +376,27 @@ void displaySavedValues() {
     fill(hValues[i], sValues[i], bValues[i]);
     rect(0, 0, 100, 100);
 
+    // Display HSB values for "main" color
+    textSize(12);
+    fill(0, 0, 0);
+    stroke(0, 0, 0);
+    translate(offset, 12.5, 0); 
+    text("H: " + round(hValues[i]) + "\u00B0  S: " + round(sValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+    translate(-1*offset, -12.5, 0);
+
     // Complementary colour
+    noStroke();
     fill((hValues[i] + 180) % 360, sValues[i], bValues[i]);
     rect(25, 25, 50, 50);
+
+    // Display HSB values for complementary color
+    textSize(12);
+    fill(0, 0, 0);
+    stroke(0, 0, 0);
+    translate(offset, 50, 0); 
+    text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+    translate(-1*offset, -50, 0);
+
   }
 
   popMatrix();
