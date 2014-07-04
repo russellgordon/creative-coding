@@ -154,10 +154,13 @@ void mouseMoved() {
 
   // Base saturation on distance from centre of colour circle
   float armLength = dist(xPos, yPos, 0, 0);
-  armLength = armLength/(0.25*cos(h)+0.75); // adjust for effect of tilted circle
-  //println(armLength);
-  s = 100;
-  //s = map(armLength, 0, 150, 0, 100);
+  armLength = armLength / (0.5*abs(cos(radians(h))) + 0.5); // adjust for effect of tilted circle
+  if (armLength > 150) {
+    armLength = 150;
+  }
+  println(armLength);
+  //s = 100;
+  s = map(armLength, 0, 150, 0, 100);
 }
 
 void keyPressed() {
