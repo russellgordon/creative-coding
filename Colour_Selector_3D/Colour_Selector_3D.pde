@@ -38,6 +38,12 @@ float h = 0;
 float s = 100;
 float b = 100;
 
+// Arrays to store HSB values
+float[] hValues, sValues, bValues;
+int currentValue = 0;
+int maxValues = 6;
+boolean palettesFilled = false; // whether all "slots" to store values have been used yet
+
 // Whether to adjust each type of value
 boolean adjustHue = false;
 boolean adjustSaturation = false;
@@ -48,6 +54,13 @@ void setup() {
 
   // Create canvas
   size(1000, 400, P3D);
+
+  // Reset variables
+  h = 0;
+  s = 100;
+  b = 100;
+  currentValue = 0;
+  palettesFilled = false;
 
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
@@ -60,6 +73,11 @@ void setup() {
 
   // Perspective mode
   ortho();
+
+  // Initialize arrays
+  hValues = new float[maxValues];
+  sValues = new float[maxValues];
+  bValues = new float[maxValues];
 }
 
 // This runs repeatedly, allowing for the animation to occur.
@@ -92,6 +110,9 @@ void draw() {
 
   // Display current HSB values
   displayValues();
+
+  // Display saved HSB values
+  displaySavedValues();
 }
 
 // drawColourCylinderSlice
@@ -218,7 +239,7 @@ void displayValues() {
 
 // mouseMoved
 //
-// Purpose: Built-in processing function used to track current mouse position.
+// Purpose: Built-in Processing function that is run when the mouse moves.
 //
 void mouseMoved() {
 
@@ -269,7 +290,7 @@ void mouseMoved() {
 
 // keyPressed
 //
-// Purpose: Built-in processing function used to track when a key is pressed on the keyboard
+// Purpose: Built-in Processing function that is run when a key on the keyboard is pressed.
 //
 void keyPressed() {
 
@@ -283,11 +304,16 @@ void keyPressed() {
       adjustSaturation = true;
     }
   }
+
+  // Reset the sketch if requested
+  if (key == 'r') {
+    setup();
+  }
 }
 
 // keyReleased
 //
-// Purpose: Built-in processing function used to track when a key is pressed on the keyboard
+// Purpose: Built-in Processing function that is run when a key on the keyboard is released.
 //
 void keyReleased() {
 
@@ -295,4 +321,62 @@ void keyReleased() {
   adjustHue = false;
   adjustSaturation = false;
   adjustBrightness = false;
+}
+
+// mousePressed
+//
+// Purpose: Built-in Processing function that is run when the mouse button is pressed.
+//
+void mousePressed() {
+
+  // Save current HSB values
+  hValues[currentValue] = h;
+  sValues[currentValue] = s;
+  bValues[currentValue] = b;
+
+  // Move to next postion in HSB value storage arrays
+  currentValue++;
+  if (currentValue == maxValues) {
+    currentValue = 0;
+    palettesFilled = true;
+  }
+}
+
+// displaySavedValues
+//
+// Purpose: Display all saved HSB values on screen
+//
+void displaySavedValues() {
+
+  pushMatrix();
+  translate(25, -100, 0);
+
+  // Determine how many palettes to show
+  int displayMax = 0;
+  if (currentValue > 0 && palettesFilled == false) {
+    displayMax = currentValue;
+  } else if (palettesFilled == true) {
+    displayMax = hValues.length;
+  }
+
+  // Show the palettes
+  for (int i = 0; i < displayMax; i++) {
+
+    // Check if in second column
+    if (i == hValues.length / 2) {
+      translate(850, -375, 0); // Reset for second column
+    }
+    translate(0, 125, 0);
+
+    // "Main" colour
+    noStroke();
+    fill(hValues[i], sValues[i], bValues[i]);
+    rect(0, 0, 100, 100);
+
+    // Complementary colour
+    fill((hValues[i] + 180) % 360, sValues[i], bValues[i]);
+    rect(25, 25, 50, 50);
+  }
+
+  popMatrix();
 }
