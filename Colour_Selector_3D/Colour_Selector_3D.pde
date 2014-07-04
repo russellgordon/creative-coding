@@ -30,14 +30,8 @@ void draw() {
 
   // Draw the cylinder
   pushMatrix();
-  drawColourCylinder(height/4*3, 0, 360);
+  drawColourCylinderSlice(height/4*3, 0, 360);
   popMatrix();
-
-  //  // Change the hue
-  //  h+=1;
-  //  if (h > 360) {
-  //    h = 0;
-  //  }
 
   // Draw the handles
   drawMarker(true); // main colour
@@ -64,24 +58,28 @@ void drawMarker(boolean mainColour) {
   translate(0, 0, (100-b));  // make sure markers move if the brightness is changed
   rotate(radians(colour)); // rotate around centre of colour circle
   translate((height/4*3)/2 + 60, 0); // move origin to middle of marker circle
-  rotateX(radians(colour));  // keep handle colour mostly visible while it rotates
-  rotateY(radians(colour));  // keep handle colour mostly visible while it rotates
-  if (mainColour) {
-    ellipse(0, 0, 50, 50); // draw the marker
-  } else {
-    ellipse(0, 0, 30, 30); // draw the complementary marker
+  
+  // keep handles "facing" viewer while they rotate
+  rotateX(radians(90));  
+  if ((colour > 0 && colour <= 90) || (colour > 270 && colour <= 360)) {
+    rotateY(radians(-90*sin(radians(colour))));
+  } else if ((colour > 90 && colour <= 180) || (colour > 180 && colour <= 270)) {
+    rotateY(radians(90*sin(radians(colour))));
   }
+  
+  // draw the actual marker
+  ellipse(0, 0, 50, 50);
   popMatrix();
 }
 
-// drawColourCylinder
+// drawColourCylinderSlice
 //
-// Purpose: Draws the colour cylinder
+// Purpose: Draws a "slice" of the HSB colour cylinder
 //
 // Parameters:      diameter    How large the cylinder should be, across.
 //                  fromAngle   Hue at which to start drawing a slice.
 //                  toAngle     Hue at which to finish drawing a slice.
-void drawColourCylinder(float diameter, float fromAngle, float toAngle) {
+void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
 
   // Sanity check: size of cylinder
   diameter = abs(diameter);
@@ -130,30 +128,36 @@ void mouseMoved() {
     b = map(mouseY, height, 0, 0, 100);
   }
 
-  // Base saturation on distance from centre of colour circle
+  // Determine distance of mouse cursor from centre of circle
   float xPos = mouseX - width/2;
   float yPos = (mouseY - height/3 - (100-b))*-1;
-  float armLength = dist(xPos, yPos, 0, 0);
-  s = map(armLength, 0, 150, 0, 100);
 
-  // Base hue on angle
+  // Base hue on angle, calculated from current x, y position relative to centre of colour wheel
   if (xPos > 150) {
     xPos = 150;
   }
-  if (yPos > 150) {
-    xPos = 150;
+  if (yPos > 75) {
+    yPos = 75;
   }
   if (xPos < -150) {
     xPos = -150;
   }
-  if (yPos < -150) {
-    xPos = -150;
+  if (yPos < -75) {
+    yPos = -75;
   }
   float hue = degrees(atan2(yPos, xPos));
   if (hue < 0) {
-    hue = 360 - abs(hue);
+    h = 360 - abs(hue);
+  } else {
+    h = hue;
   }
-  h = hue;
+
+  // Base saturation on distance from centre of colour circle
+  float armLength = dist(xPos, yPos, 0, 0);
+  armLength = armLength/(0.25*cos(h)+0.75); // adjust for effect of tilted circle
+  //println(armLength);
+  s = 100;
+  //s = map(armLength, 0, 150, 0, 100);
 }
 
 void keyPressed() {
