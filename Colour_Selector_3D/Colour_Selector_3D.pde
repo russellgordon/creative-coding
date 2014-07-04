@@ -64,8 +64,8 @@ void drawMarker(boolean mainColour) {
   translate(0, 0, (100-b));  // make sure markers move if the brightness is changed
   rotate(radians(colour)); // rotate around centre of colour circle
   translate((height/4*3)/2 + 60, 0); // move origin to middle of marker circle
-  rotateX(radians(h));  // keep handle colour mostly visible while it rotates
-  rotateY(radians(h));  // keep handle colour mostly visible while it rotates
+  rotateX(radians(colour));  // keep handle colour mostly visible while it rotates
+  rotateY(radians(colour));  // keep handle colour mostly visible while it rotates
   if (mainColour) {
     ellipse(0, 0, 50, 50); // draw the marker
   } else {
