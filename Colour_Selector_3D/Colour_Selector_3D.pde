@@ -19,6 +19,9 @@ void setup() {
   
   // Text alignment for text boxes (centered vertically and horizontally)
   textAlign(CENTER, CENTER);
+  
+  // Smoothness of drawing
+  smooth(2);
 
   // Perspective mode
   ortho();
@@ -39,7 +42,10 @@ void draw() {
 
   // Draw a "slice" of the colour cylinder
   drawColourCylinderSlice(height/4*3, 0, 360);
-
+  
+  // Draw a grey outline of the colour cylinder
+  drawCylinderOutline();
+  
   // Draw the markers
   pushMatrix();
   drawMarker(true); // main colour
@@ -103,6 +109,30 @@ void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
     }
   }
   
+  popMatrix();
+
+}
+
+// drawCylinderOutline
+//
+// Purpose: Draws an outline of the HSB colour cylinder
+//
+// Parameters: none
+//
+void drawCylinderOutline() {
+
+  pushMatrix();
+  strokeWeight(4);
+  stroke(325);
+  translate(0, 0, -1);
+  noFill();
+  ellipse(0, 0, height/4*3+6, height/4*3+6); // top circle
+  translate(0, 0, 100);
+  ellipse(0, 0, height/4*3+6, height/4*3+6); // bottom circle
+  translate((height/4*3+6)/2, 0, 0);
+  line(0, 0, 0, 0, 0, -100); // right line
+  translate(-1*(height/4*3+6), 0, 0);
+  line(0, 0, 0, 0, 0, -100); // right line
   popMatrix();
 
 }
