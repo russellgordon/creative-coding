@@ -181,7 +181,7 @@ void displayValues() {
   textSize(16);
   fill(0, 0, 0);
   stroke(0, 0, 0);
-  text("hue: " + round(h) + "  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0); 
+  text("hue: " + round(h) + "\u00B0  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0); 
 }
 
 // mouseMoved
