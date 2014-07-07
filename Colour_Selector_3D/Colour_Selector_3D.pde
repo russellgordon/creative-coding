@@ -52,6 +52,9 @@ boolean adjustHue = false;
 boolean adjustSaturation = false;
 boolean adjustBrightnessOrLightness = false;
 
+// What colour model is being displayed
+boolean HSBModel = true;    // true is HSB, false is HSL
+
 // This runs once only.
 void setup() {
 
@@ -117,7 +120,7 @@ void draw() {
 
   // Display saved HSB values
   displaySavedValues();
-  
+
   // Draw the help text
   drawHelpText();
 }
@@ -318,8 +321,14 @@ void keyPressed() {
   }
 
   // Reset the sketch if requested
-  if (key == 'r') {
+  if (key == 'r' || key == 'R') {
     setup();
+  } else if (key == 'm' || key == 'M') {
+    if (HSBModel) {
+      HSBModel = false;
+    } else {
+      HSBModel = true;
+    }
   }
 }
 
@@ -343,8 +352,10 @@ void mousePressed() {
 
   // Save current HSB values
   hValues[currentValue] = h;
-  sHSBValues[currentValue] = sHSB;
   bValues[currentValue] = b;
+  lValues[currentValue] = getLightness();
+  sHSBValues[currentValue] = sHSB;
+  sHSLValues[currentValue] = getHSLSaturation();
 
   // Move to next postion in HSB value storage arrays
   currentValue++;
@@ -352,6 +363,41 @@ void mousePressed() {
     currentValue = 0;
     palettesFilled = true;
   }
+}
+
+// getHSLSaturation
+//
+// Purpose: Provide saturation value for HSL colour model.
+//          Using http://codeitdown.com/hsl-hsb-hsv-color/ for conversion formulas.
+//
+// Parameters:     none   (uses global variables)
+//
+// Returns:        current saturation in HSL colour model
+//
+float getHSLSaturation() {
+
+  return (((b/100) * (sHSB/100)) / (1 - abs(2*(l/100) - 1))) * 100;
+}
+
+// getLightness
+//
+// Purpose: Provide lightness value for HSL colour model.
+//          Using http://codeitdown.com/hsl-hsb-hsv-color/ for conversion formulas.
+//
+// Parameters:     none   (uses global variables)
+//
+// Returns:        current lightness in HSL colour model
+//
+float getLightness() {
+
+  println("brightness: " + b/100);
+  println("saturation: " + sHSB/100);
+  
+  l = (((b/100)*(2-(sHSB/100))) / 2) * 100;
+  
+  println("lightness: " + l);
+
+  return l;
 }
 
 // displaySavedValues
@@ -394,8 +440,12 @@ void displaySavedValues() {
     textSize(12);
     fill(0, 0, 0);
     stroke(0, 0, 0);
-    translate(offset, 12.5, 0); 
-    text("H: " + round(hValues[i]) + "\u00B0  S: " + round(sHSBValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+    translate(offset, 12.5, 0);
+    if (HSBModel) { 
+      text("H: " + round(hValues[i]) + "\u00B0  S: " + round(sHSBValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+    } else {
+      text("H: " + round(hValues[i]) + "\u00B0  S: " + round(sHSLValues[i]) + "%" + "  L: " + round(lValues[i]) + "%", 0, 0, 0);
+    }
     translate(-1*offset, -12.5, 0);
 
     // Complementary colour
@@ -408,7 +458,11 @@ void displaySavedValues() {
     fill(0, 0, 0);
     stroke(0, 0, 0);
     translate(offset, 50, 0); 
-    text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sHSBValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+    if (HSBModel) {
+      text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sHSBValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+    } else {
+      text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sHSLValues[i]) + "%" + "  L: " + round(lValues[i]) + "%", 0, 0, 0);
+    }
     translate(-1*offset, -50, 0);
   }
 
@@ -439,5 +493,5 @@ void drawHelpText() {
   fill(0);
   text("Press 'CONTROL' key and move mouse pointer around colour wheel to adjust hue.", width/2, 20);
   text("Press 'ALT' key and move to and from center of colour wheel to adjust saturation.", width/2, 45);
-  text("Press 'SHIFT' and move up/down to adjust brightness.  Click mouse button to save colours.  'R' to reset.", width/2, 70);
+  text("Press 'SHIFT' and move up/down to adjust brightness.  Click mouse button to save colours.  'M' to change colour mode.  'R' to reset.", width/2, 70);
 }
