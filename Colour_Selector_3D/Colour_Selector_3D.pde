@@ -69,6 +69,7 @@ void setup() {
   l = 50;
   currentValue = 0;
   palettesFilled = false;
+  HSBModel = true;
 
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
@@ -123,6 +124,9 @@ void draw() {
 
   // Draw the help text
   drawHelpText();
+
+  // Stop drawing until mouse is moved to save CPU cycles
+  noLoop();
 }
 
 // drawColourCylinderSlice
@@ -154,21 +158,40 @@ void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
     fromAngle = tempAngle;
   }
 
+  // Set height in cylinder for clarity
+  float heightInCylinder = b;
+
   // Move down a "slice" in the cylinder
   translate(0, 0, (100-b));
 
   // Draw the current slice
   for (float currentDiameter = diameter; currentDiameter >= 0; currentDiameter -= diameter / 75) {
 
-    float saturation = map(currentDiameter, 0, diameter, 0, 100);
+    float radius = map(currentDiameter / 2, 0, diameter / 2, 0, 100);
 
     for (float angle = fromAngle; angle < toAngle; angle+=1) {
 
-      // Only draw the edges of the cylinder for efficiency
-
       // Set color and draw arc with this hue
-      fill(angle, saturation, b);
-      stroke(angle, saturation, b);
+      if (HSBModel) {
+        // HSB colours
+        fill(angle, radius, heightInCylinder);
+        stroke(angle, radius, heightInCylinder);
+      } else {
+        // HSL colours (whoa, this was hard to figure out... I *think* I've got it correct)
+        // Using:
+        // 
+        //       http://hslpicker.com/ 
+        //       ... and ...
+        //       http://codeitdown.com/hsl-hsb-hsv-color/
+        //       ... and ...
+        //       http://en.wikipedia.org/wiki/File:Color_cones.png
+        //
+        // ... for reference material. 
+        float brightness = getBrightness(heightInCylinder, radius);
+        float saturationHSB = getHSBSaturation(brightness, heightInCylinder);
+        fill(angle, saturationHSB, brightness);
+        stroke(angle, saturationHSB, brightness);
+      }
       strokeWeight(4);
       arc(0, 0, currentDiameter, currentDiameter, radians(angle), radians(angle + 3));
     }
@@ -217,7 +240,13 @@ void drawMarker(boolean mainColour) {
   pushMatrix();
   strokeWeight(1.5);
   stroke(250);
-  fill(colour, sHSB, b);
+  if (HSBModel) {
+    fill(colour, sHSB, b);
+  } else {
+    float brightness = getBrightness(b, sHSB);
+    float saturationHSB = getHSBSaturation(brightness, b);
+    fill(colour, saturationHSB, brightness);
+  }
   translate(0, 0, (100-b));  // make sure markers move if the brightness is changed
   rotate(radians(colour)); // rotate around centre of colour circle
   translate(((height - 100)/4*3)/2 + 60, 0); // move origin to middle of marker circle
@@ -247,7 +276,18 @@ void displayValues() {
   textSize(24);
   fill(0, 0, 0);
   stroke(0, 0, 0);
-  text("hue: " + round(h) + "\u00B0  saturation: " + round(sHSB) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0);
+  if (HSBModel) {
+    text("hue: " + round(h) + "\u00B0  saturation: " + round(sHSB) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0);
+  } else {
+    text("hue: " + round(h) + "\u00B0  saturation: " + round(sHSB) + "%" + "  lightness: " + round(b) + "%", width/2, height - 50, 0);
+  }
+}
+
+// mouseReleased
+//
+// Purpose: Built-in Processing function that is run when the mouse button. 
+//
+void mouseReleased() {
 }
 
 // mouseMoved
@@ -256,10 +296,14 @@ void displayValues() {
 //
 void mouseMoved() {
 
+  // Start animating again
+  loop();
+
   // Change brightness based on vertical mouse position
   if (adjustBrightnessOrLightness) {
     if (mouseY >= 150 && mouseY <= 405) {
       b = map(mouseY - 150, 255, 0, 0, 100);
+      l = getLightness(b, sHSB);
     }
   }
 
@@ -291,7 +335,6 @@ void mouseMoved() {
     }
   }
 
-
   // Base saturation on distance from centre of colour circle
   if (adjustSaturation) {
     float armLength = dist(xPos, yPos, 0, 0);
@@ -300,6 +343,7 @@ void mouseMoved() {
       armLength = 150;
     }
     sHSB = map(armLength, 0, 150, 0, 100);
+    sHSL = getHSLSaturation(b, l, sHSB);
   }
 }
 
@@ -323,12 +367,14 @@ void keyPressed() {
   // Reset the sketch if requested
   if (key == 'r' || key == 'R') {
     setup();
+    loop();
   } else if (key == 'm' || key == 'M') {
     if (HSBModel) {
       HSBModel = false;
     } else {
       HSBModel = true;
     }
+    loop();
   }
 }
 
@@ -353,9 +399,9 @@ void mousePressed() {
   // Save current HSB values
   hValues[currentValue] = h;
   bValues[currentValue] = b;
-  lValues[currentValue] = getLightness();
+  lValues[currentValue] = getLightness(b, sHSB);
   sHSBValues[currentValue] = sHSB;
-  sHSLValues[currentValue] = getHSLSaturation();
+  sHSLValues[currentValue] = getHSLSaturation(b, l, sHSB);
 
   // Move to next postion in HSB value storage arrays
   currentValue++;
@@ -370,13 +416,15 @@ void mousePressed() {
 // Purpose: Provide saturation value for HSL colour model.
 //          Using http://codeitdown.com/hsl-hsb-hsv-color/ for conversion formulas.
 //
-// Parameters:     none   (uses global variables)
+// Parameters:     Brightness value, as a percentage between 0 and 100.
+//                 Lightness value, as a percentage between 0 and 100.
+//                 HSB saturation, as a percentage between 0 and 100.
 //
-// Returns:        current saturation in HSL colour model
+// Returns:        HSL colour model saturation, as a percentage between 0 and 100.
 //
-float getHSLSaturation() {
+float getHSLSaturation(float brightness, float lightness, float saturationHSB) {
 
-  return (((b/100) * (sHSB/100)) / (1 - abs(2*(l/100) - 1))) * 100;
+  return (((brightness/100) * (saturationHSB/100)) / (1 - abs(2*(lightness/100) - 1))) * 100;
 }
 
 // getLightness
@@ -384,20 +432,44 @@ float getHSLSaturation() {
 // Purpose: Provide lightness value for HSL colour model.
 //          Using http://codeitdown.com/hsl-hsb-hsv-color/ for conversion formulas.
 //
-// Parameters:     none   (uses global variables)
+// Parameters:     Brightness value, as a percentage between 0 and 100.
+//                 HSB saturation, as a percentage between 0 and 100.
 //
-// Returns:        current lightness in HSL colour model
+// Returns:        HSL colour model lightness, as a percentage between 0 and 100.
 //
-float getLightness() {
+float getLightness(float brightness, float saturationHSB) {
 
-  println("brightness: " + b/100);
-  println("saturation: " + sHSB/100);
-  
-  l = (((b/100)*(2-(sHSB/100))) / 2) * 100;
-  
-  println("lightness: " + l);
+  return (((brightness/100)*(2-(saturationHSB/100))) / 2) * 100;
+}
 
-  return l;
+// getBrightness
+//
+// Purpose: Convert HSL colour model lightness to HSB colour model brightness. 
+//          Using http://codeitdown.com/hsl-hsb-hsv-color/ for conversion formulas.
+//
+// Parameters:     Lightness value for HSL colour model, as a percentage between 0 and 100.
+//                 HSL colour model saturation, as a percentage between 0 and 100.
+//
+// Returns:        Brightness value for HSB colour model, as a percentage between 0 and 100.
+//
+float getBrightness(float lightness, float saturationHSL) {
+
+  return ( ( 2*(lightness/100) + (saturationHSL/100)*(1 - abs(2*(lightness/100) - 1)) ) / 2) * 100;
+}
+
+// getHSBSaturation
+//
+// Purpose: Provide saturation value for HSB colour model.
+//          Using http://codeitdown.com/hsl-hsb-hsv-color/ for conversion formulas.
+//
+// Parameters:     Brightness value, as a percentage between 0 and 100.
+//                 Lightness value, as a percentage between 0 and 100.
+//
+// Returns:        HSB colour model saturation, as a percentage between 0 and 100.
+//
+float getHSBSaturation(float brightness, float lightness) {
+
+  return (2*((brightness/100) - (lightness/100)) / (brightness/100)) * 100;
 }
 
 // displaySavedValues
@@ -493,5 +565,9 @@ void drawHelpText() {
   fill(0);
   text("Press 'CONTROL' key and move mouse pointer around colour wheel to adjust hue.", width/2, 20);
   text("Press 'ALT' key and move to and from center of colour wheel to adjust saturation.", width/2, 45);
-  text("Press 'SHIFT' and move up/down to adjust brightness.  Click mouse button to save colours.  'M' to change colour mode.  'R' to reset.", width/2, 70);
+  if (HSBModel) {
+    text("Press 'SHIFT' and move up/down to adjust brightness.  Click mouse button to save colours.  'M' to change colour mode.  'R' to reset.", width/2, 70);
+  } else {
+    text("Press 'SHIFT' and move up/down to adjust lightness.  Click mouse button to save colours.  'M' to change colour mode.  'R' to reset.", width/2, 70);
+  }
 }
