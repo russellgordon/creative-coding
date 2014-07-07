@@ -34,15 +34,12 @@
  */
 
 // Variables to control colour of markers
-float h = 0;       // Hue for HSB or HSL colour models
-float sHSB = 100;  // Saturation for HSB colour model
-float sHSL = 100;  // Saturation for HSL colour model
-float b = 100;     // Brightness for HSB colour model
-float l = 50;      // Lightness or luminosity for HSL color model
-
+float a = 0;       // Current angle in standard position on colour cylinder
+float d = 100;     // Current distance from centre of colour cylinder
+float h = 100;     // Current height of displayed disc in colour cylinder
 
 // Arrays to store HSB and HSL values
-float[] hValues, sHSBValues, sHSLValues, bValues, lValues;
+float[] hueValues, saturationHSBValues, saturationHSLValues, brightnessValues, lightnessValues;
 int currentValue = 0;
 int maxValues = 6;
 boolean palettesFilled = false; // whether all "slots" to store values have been used yet
@@ -53,7 +50,7 @@ boolean adjustSaturation = false;
 boolean adjustBrightnessOrLightness = false;
 
 // What colour model is being displayed
-boolean HSBModel = true;    // true is HSB, false is HSL
+boolean HSBModel = true;    // HSB if true, HSL if flase
 
 // This runs once only.
 void setup() {
@@ -62,14 +59,17 @@ void setup() {
   size(1200, 500, P3D);
 
   // Reset variables
-  h = 0;
-  sHSB = 100;
-  sHSL = 100;
-  b = 100;
-  l = 50;
   currentValue = 0;
   palettesFilled = false;
-  HSBModel = true;
+  if (HSBModel) {
+    a = 0;
+    d = 100;
+    h = 100;
+  } else {
+    a = 0;
+    d = 100;
+    h = 50;
+  }
 
   // Colour mode is HSB
   colorMode(HSB, 360, 100, 100, 100);
@@ -81,11 +81,11 @@ void setup() {
   ortho();
 
   // Initialize arrays
-  hValues = new float[maxValues];
-  sHSBValues = new float[maxValues];
-  sHSLValues = new float[maxValues];
-  bValues = new float[maxValues];
-  lValues = new float[maxValues];
+  hueValues = new float[maxValues];
+  saturationHSBValues = new float[maxValues];
+  saturationHSLValues = new float[maxValues];
+  brightnessValues = new float[maxValues];
+  lightnessValues = new float[maxValues];
 }
 
 // This runs repeatedly, allowing for the animation to occur.
@@ -96,7 +96,7 @@ void draw() {
 
   // Transformations so that "cylinder" can be viewed slightly from the side
   pushMatrix();
-  translate(width/2, (height - 100)/3 + 100, (100-b));
+  translate(width/2, (height - 100)/3 + 100, (100-h));
   scale(1, -1);
   rotateX(radians(120));
   scale(1, -1);
@@ -158,11 +158,8 @@ void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
     fromAngle = tempAngle;
   }
 
-  // Set height in cylinder for clarity
-  float heightInCylinder = b;
-
   // Move down a "slice" in the cylinder
-  translate(0, 0, (100-b));
+  translate(0, 0, (100-h));
 
   // Draw the current slice
   for (float currentDiameter = diameter; currentDiameter >= 0; currentDiameter -= diameter / 75) {
@@ -174,8 +171,8 @@ void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
       // Set color and draw arc with this hue
       if (HSBModel) {
         // HSB colours
-        fill(angle, radius, heightInCylinder);
-        stroke(angle, radius, heightInCylinder);
+        fill(angle, radius, h);
+        stroke(angle, radius, h);
       } else {
         // HSL colours (whoa, this was hard to figure out... I *think* I've got it correct)
         // Using:
@@ -187,8 +184,8 @@ void drawColourCylinderSlice(float diameter, float fromAngle, float toAngle) {
         //       http://en.wikipedia.org/wiki/File:Color_cones.png
         //
         // ... for reference material. 
-        float brightness = getBrightness(heightInCylinder, radius);
-        float saturationHSB = getHSBSaturation(brightness, heightInCylinder);
+        float brightness = getBrightness(h, radius);
+        float saturationHSB = getHSBSaturation(brightness, h);
         fill(angle, saturationHSB, brightness);
         stroke(angle, saturationHSB, brightness);
       }
@@ -233,21 +230,21 @@ void drawCylinderOutline() {
 //
 void drawMarker(boolean mainColour) {
 
-  float colour = h;
+  float colour = a;
   if (!mainColour) {
-    colour = (h + 180) % 360;
+    colour = (a + 180) % 360;
   }
   pushMatrix();
   strokeWeight(1.5);
   stroke(250);
   if (HSBModel) {
-    fill(colour, sHSB, b);
+    fill(colour, d, h);
   } else {
-    float brightness = getBrightness(b, sHSB);
-    float saturationHSB = getHSBSaturation(brightness, b);
+    float brightness = getBrightness(h, d);
+    float saturationHSB = getHSBSaturation(brightness, h);
     fill(colour, saturationHSB, brightness);
   }
-  translate(0, 0, (100-b));  // make sure markers move if the brightness is changed
+  translate(0, 0, (100-h));  // make sure markers move if the brightness/lightness is changed
   rotate(radians(colour)); // rotate around centre of colour circle
   translate(((height - 100)/4*3)/2 + 60, 0); // move origin to middle of marker circle
 
@@ -277,9 +274,9 @@ void displayValues() {
   fill(0, 0, 0);
   stroke(0, 0, 0);
   if (HSBModel) {
-    text("hue: " + round(h) + "\u00B0  saturation: " + round(sHSB) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0);
+    text("hue: " + round(a) + "\u00B0  saturation: " + round(d) + "%" + "  brightness: " + round(h) + "%", width/2, height - 50, 0);
   } else {
-    text("hue: " + round(h) + "\u00B0  saturation: " + round(sHSB) + "%" + "  lightness: " + round(b) + "%", width/2, height - 50, 0);
+    text("hue: " + round(a) + "\u00B0  saturation: " + round(d) + "%" + "  lightness: " + round(h) + "%", width/2, height - 50, 0);
   }
 }
 
@@ -299,17 +296,16 @@ void mouseMoved() {
   // Start animating again
   loop();
 
-  // Change brightness based on vertical mouse position
+  // Change brightness/lightness based on vertical mouse position
   if (adjustBrightnessOrLightness) {
     if (mouseY >= 150 && mouseY <= 405) {
-      b = map(mouseY - 150, 255, 0, 0, 100);
-      l = getLightness(b, sHSB);
+      h = map(mouseY - 150, 255, 0, 0, 100);
     }
   }
 
   // Determine distance of mouse cursor from centre of circle
   float xPos = mouseX - width/2;
-  float yPos = (mouseY - ((height - 100)/3 + 100) - (100-b))*-1;
+  float yPos = (mouseY - ((height - 100)/3 + 100) - (100-h))*-1;
 
   // Base hue on angle, calculated from current x, y position relative to centre of colour wheel
   if (!adjustBrightnessOrLightness) {
@@ -328,9 +324,9 @@ void mouseMoved() {
     if (adjustHue) {
       float hue = degrees(atan2(yPos, xPos));
       if (hue < 0) {
-        h = 360 - abs(hue);
+        a = 360 - abs(hue);
       } else {
-        h = hue;
+        a = hue;
       }
     }
   }
@@ -338,12 +334,11 @@ void mouseMoved() {
   // Base saturation on distance from centre of colour circle
   if (adjustSaturation) {
     float armLength = dist(xPos, yPos, 0, 0);
-    armLength = armLength / (0.5*abs(cos(radians(h))) + 0.5); // adjust for effect of tilted circle
+    armLength = armLength / (0.5*abs(cos(radians(a))) + 0.5); // adjust for effect of tilted circle
     if (armLength > 150) {
       armLength = 150;
     }
-    sHSB = map(armLength, 0, 150, 0, 100);
-    sHSL = getHSLSaturation(b, l, sHSB);
+    d = map(armLength, 0, 150, 0, 100);
   }
 }
 
@@ -371,8 +366,16 @@ void keyPressed() {
   } else if (key == 'm' || key == 'M') {
     if (HSBModel) {
       HSBModel = false;
+      // Switch position in HSB cylinder to equivalent position in HSL cylinder
+      float brightness = h; 
+      h = getLightness(h, d);
+      d = getHSLSaturation(brightness, h, d);
     } else {
       HSBModel = true;
+      // Switch position in HSL cylinder to equivalent position in HSB cylinder
+      float lightness = h; 
+      h = getBrightness(h, d);
+      d = getHSBSaturation(h, lightness);
     }
     loop();
   }
@@ -397,11 +400,20 @@ void keyReleased() {
 void mousePressed() {
 
   // Save current HSB values
-  hValues[currentValue] = h;
-  bValues[currentValue] = b;
-  lValues[currentValue] = getLightness(b, sHSB);
-  sHSBValues[currentValue] = sHSB;
-  sHSLValues[currentValue] = getHSLSaturation(b, l, sHSB);
+  hueValues[currentValue] = a;
+  if (HSBModel) {
+    brightnessValues[currentValue] = h;
+    float lightness = getLightness(h, d);
+    lightnessValues[currentValue] = lightness;
+    saturationHSBValues[currentValue] = d;
+    saturationHSLValues[currentValue] = getHSLSaturation(h, lightness, d);
+  } else {
+    lightnessValues[currentValue] = h;
+    float brightness = getBrightness(h, d);
+    brightnessValues[currentValue] = brightness;
+    saturationHSLValues[currentValue] = d;
+    saturationHSBValues[currentValue] = getHSBSaturation(brightness, h);
+  }
 
   // Move to next postion in HSB value storage arrays
   currentValue++;
@@ -409,6 +421,9 @@ void mousePressed() {
     currentValue = 0;
     palettesFilled = true;
   }
+  
+  // Update display
+  loop();
 }
 
 // getHSLSaturation
@@ -489,14 +504,14 @@ void displaySavedValues() {
   if (currentValue > 0 && palettesFilled == false) {
     displayMax = currentValue;
   } else if (palettesFilled == true) {
-    displayMax = hValues.length;
+    displayMax = hueValues.length;
   }
 
   // Show the palettes
   for (int i = 0; i < displayMax; i++) {
 
     // Check if in second column
-    if (i == hValues.length / 2) {
+    if (i == hueValues.length / 2) {
       translate(1050, -375, 0); // Reset for second column
       textAlign(RIGHT, CENTER); // Text alignment for text boxes (centered vertically and horizontally)
       offset = -12.5;
@@ -505,7 +520,7 @@ void displaySavedValues() {
 
     // "Main" colour
     noStroke();
-    fill(hValues[i], sHSBValues[i], bValues[i]);
+    fill(hueValues[i], saturationHSBValues[i], brightnessValues[i]);
     rect(0, 0, 100, 100);
 
     // Display HSB values for "main" color
@@ -514,15 +529,15 @@ void displaySavedValues() {
     stroke(0, 0, 0);
     translate(offset, 12.5, 0);
     if (HSBModel) { 
-      text("H: " + round(hValues[i]) + "\u00B0  S: " + round(sHSBValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+      text("H: " + round(hueValues[i]) + "\u00B0  S: " + round(saturationHSBValues[i]) + "%" + "  B: " + round(brightnessValues[i]) + "%", 0, 0, 0);
     } else {
-      text("H: " + round(hValues[i]) + "\u00B0  S: " + round(sHSLValues[i]) + "%" + "  L: " + round(lValues[i]) + "%", 0, 0, 0);
+      text("H: " + round(hueValues[i]) + "\u00B0  S: " + round(saturationHSLValues[i]) + "%" + "  L: " + round(lightnessValues[i]) + "%", 0, 0, 0);
     }
     translate(-1*offset, -12.5, 0);
 
     // Complementary colour
     noStroke();
-    fill((hValues[i] + 180) % 360, sHSBValues[i], bValues[i]);
+    fill((hueValues[i] + 180) % 360, saturationHSBValues[i], brightnessValues[i]);
     rect(25, 25, 50, 50);
 
     // Display HSB values for complementary color
@@ -531,9 +546,9 @@ void displaySavedValues() {
     stroke(0, 0, 0);
     translate(offset, 50, 0); 
     if (HSBModel) {
-      text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sHSBValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+      text("H: " + round((hueValues[i] + 180) % 360) + "\u00B0  S: " + round(saturationHSBValues[i]) + "%" + "  B: " + round(brightnessValues[i]) + "%", 0, 0, 0);
     } else {
-      text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sHSLValues[i]) + "%" + "  L: " + round(lValues[i]) + "%", 0, 0, 0);
+      text("H: " + round((hueValues[i] + 180) % 360) + "\u00B0  S: " + round(saturationHSLValues[i]) + "%" + "  L: " + round(lightnessValues[i]) + "%", 0, 0, 0);
     }
     translate(-1*offset, -50, 0);
   }
