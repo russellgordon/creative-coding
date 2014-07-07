@@ -9,11 +9,13 @@
 /*
  * PURPOSE
  *
- * This is a complementary colour selection tool, based on the Hue-Saturation-Brightness colour model.
+ * This is a complementary colour selection tool.
+ * 
+ * You can work in the Hue-Saturation-Brightness colour model, or, the Hue-Saturation-Lightness colour model.
  *
- * A static summary of how colours are selected using this model is available here:
+ * An overview of the difference between these models is available here:
  *
- * https://twitter.com/rgordon/status/406373396939673602/photo/1
+ * http://codeitdown.com/hsl-hsb-hsv-color/
  *
  * The "main" colour follows the position of the mouse; the complementary colour appears on the opposite side
  * of the colour wheel.
@@ -25,7 +27,7 @@
  *
  * Press the ALT key, then move toward or away from the centre of the colour wheel to change the saturation of the main colour.
  * 
- * Press the SHIFT key, then move up or down on the screen to change the brightness of the main colour. 
+ * Press the SHIFT key, then move up or down on the screen to change the brightness/lightness of the main colour. 
  *
  * Click the mouse button to store a pair of complementary colours.
  *
@@ -264,7 +266,7 @@ void drawMarker(boolean mainColour) {
 
 // displayValues
 //
-// Purpose: Display the hue, saturation, and brightness values on-screen.
+// Purpose: Display the hue, saturation, and brightness/lightness values on-screen.
 //
 // Parameters: none
 //
@@ -348,7 +350,7 @@ void mouseMoved() {
 //
 void keyPressed() {
 
-  // Toggle for brightness adjustment; allow when Shift key is pressed
+  // Toggle for brightness/lightness adjustment; allow when Shift key is pressed
   if (key == CODED) {
     if (keyCode == SHIFT) {
       adjustBrightnessOrLightness = true;
