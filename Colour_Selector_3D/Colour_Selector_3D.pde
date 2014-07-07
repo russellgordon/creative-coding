@@ -255,7 +255,9 @@ void mouseMoved() {
 
   // Change brightness based on vertical mouse position
   if (adjustBrightnessOrLightness) {
-    b = map(mouseY, height, 0, 0, 100);
+    if (mouseY >= 150 && mouseY <= 405) {
+      b = map(mouseY - 150, 255, 0, 0, 100);
+    }
   }
 
   // Determine distance of mouse cursor from centre of circle
