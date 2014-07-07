@@ -34,12 +34,15 @@
  */
 
 // Variables to control colour of markers
-float h = 0;
-float s = 100;
-float b = 100;
+float h = 0;       // Hue for HSB or HSL colour models
+float sHSB = 100;  // Saturation for HSB colour model
+float sHSL = 100;  // Saturation for HSL colour model
+float b = 100;     // Brightness for HSB colour model
+float l = 50;      // Lightness or luminosity for HSL color model
 
-// Arrays to store HSB values
-float[] hValues, sValues, bValues;
+
+// Arrays to store HSB and HSL values
+float[] hValues, sHSBValues, sHSLValues, bValues, lValues;
 int currentValue = 0;
 int maxValues = 6;
 boolean palettesFilled = false; // whether all "slots" to store values have been used yet
@@ -47,7 +50,7 @@ boolean palettesFilled = false; // whether all "slots" to store values have been
 // Whether to adjust each type of value
 boolean adjustHue = false;
 boolean adjustSaturation = false;
-boolean adjustBrightness = false;
+boolean adjustBrightnessOrLightness = false;
 
 // This runs once only.
 void setup() {
@@ -57,8 +60,10 @@ void setup() {
 
   // Reset variables
   h = 0;
-  s = 100;
+  sHSB = 100;
+  sHSL = 100;
   b = 100;
+  l = 50;
   currentValue = 0;
   palettesFilled = false;
 
@@ -73,8 +78,10 @@ void setup() {
 
   // Initialize arrays
   hValues = new float[maxValues];
-  sValues = new float[maxValues];
+  sHSBValues = new float[maxValues];
+  sHSLValues = new float[maxValues];
   bValues = new float[maxValues];
+  lValues = new float[maxValues];
 }
 
 // This runs repeatedly, allowing for the animation to occur.
@@ -207,7 +214,7 @@ void drawMarker(boolean mainColour) {
   pushMatrix();
   strokeWeight(1.5);
   stroke(250);
-  fill(colour, s, b);
+  fill(colour, sHSB, b);
   translate(0, 0, (100-b));  // make sure markers move if the brightness is changed
   rotate(radians(colour)); // rotate around centre of colour circle
   translate(((height - 100)/4*3)/2 + 60, 0); // move origin to middle of marker circle
@@ -237,7 +244,7 @@ void displayValues() {
   textSize(24);
   fill(0, 0, 0);
   stroke(0, 0, 0);
-  text("hue: " + round(h) + "\u00B0  saturation: " + round(s) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0);
+  text("hue: " + round(h) + "\u00B0  saturation: " + round(sHSB) + "%" + "  brightness: " + round(b) + "%", width/2, height - 50, 0);
 }
 
 // mouseMoved
@@ -247,7 +254,7 @@ void displayValues() {
 void mouseMoved() {
 
   // Change brightness based on vertical mouse position
-  if (adjustBrightness) {
+  if (adjustBrightnessOrLightness) {
     b = map(mouseY, height, 0, 0, 100);
   }
 
@@ -256,7 +263,7 @@ void mouseMoved() {
   float yPos = (mouseY - ((height - 100)/3 + 100) - (100-b))*-1;
 
   // Base hue on angle, calculated from current x, y position relative to centre of colour wheel
-  if (!adjustBrightness) {
+  if (!adjustBrightnessOrLightness) {
     if (xPos > 150) {
       xPos = 150;
     }
@@ -287,7 +294,7 @@ void mouseMoved() {
     if (armLength > 150) {
       armLength = 150;
     }
-    s = map(armLength, 0, 150, 0, 100);
+    sHSB = map(armLength, 0, 150, 0, 100);
   }
 }
 
@@ -300,7 +307,7 @@ void keyPressed() {
   // Toggle for brightness adjustment; allow when Shift key is pressed
   if (key == CODED) {
     if (keyCode == SHIFT) {
-      adjustBrightness = true;
+      adjustBrightnessOrLightness = true;
     } else if (keyCode == CONTROL) {
       adjustHue = true;
     } else if (keyCode == ALT) {
@@ -323,7 +330,7 @@ void keyReleased() {
   // When keys are not pressed, do not adjust anything
   adjustHue = false;
   adjustSaturation = false;
-  adjustBrightness = false;
+  adjustBrightnessOrLightness = false;
 }
 
 // mousePressed
@@ -334,7 +341,7 @@ void mousePressed() {
 
   // Save current HSB values
   hValues[currentValue] = h;
-  sValues[currentValue] = s;
+  sHSBValues[currentValue] = sHSB;
   bValues[currentValue] = b;
 
   // Move to next postion in HSB value storage arrays
@@ -378,7 +385,7 @@ void displaySavedValues() {
 
     // "Main" colour
     noStroke();
-    fill(hValues[i], sValues[i], bValues[i]);
+    fill(hValues[i], sHSBValues[i], bValues[i]);
     rect(0, 0, 100, 100);
 
     // Display HSB values for "main" color
@@ -386,12 +393,12 @@ void displaySavedValues() {
     fill(0, 0, 0);
     stroke(0, 0, 0);
     translate(offset, 12.5, 0); 
-    text("H: " + round(hValues[i]) + "\u00B0  S: " + round(sValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+    text("H: " + round(hValues[i]) + "\u00B0  S: " + round(sHSBValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
     translate(-1*offset, -12.5, 0);
 
     // Complementary colour
     noStroke();
-    fill((hValues[i] + 180) % 360, sValues[i], bValues[i]);
+    fill((hValues[i] + 180) % 360, sHSBValues[i], bValues[i]);
     rect(25, 25, 50, 50);
 
     // Display HSB values for complementary color
@@ -399,7 +406,7 @@ void displaySavedValues() {
     fill(0, 0, 0);
     stroke(0, 0, 0);
     translate(offset, 50, 0); 
-    text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
+    text("H: " + round((hValues[i] + 180) % 360) + "\u00B0  S: " + round(sHSBValues[i]) + "%" + "  B: " + round(bValues[i]) + "%", 0, 0, 0);
     translate(-1*offset, -50, 0);
   }
 
