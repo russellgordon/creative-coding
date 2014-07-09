@@ -164,7 +164,7 @@ void draw() {
       noStroke();
       int index = horizontalPosition+y*(width/2);
       if (index < workingImage.pixels.length) { 
-        fill(workingImage.pixels[index], horizontalOpacity); // Changing final argument (opacity) drastically changes output
+        fill(workingImage.pixels[index], verticalOpacity); // Changing final argument (opacity) drastically changes output
         if (verticalRectangle) {
           rect(horizontalDistance*i + width/2, 0, horizontalDistance, height);
         } else {
