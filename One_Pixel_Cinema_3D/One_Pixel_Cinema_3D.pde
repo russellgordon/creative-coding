@@ -34,7 +34,7 @@ boolean showVerticalSamplingPoints = true;
 int divisions = 50;  // Maximum 100! (or you will get an array out of bounds exception)
 
 // Whether to use Perlin noise to vary sampling resolution
-boolean usePerlinNoiseToVarySamplingResolution = false;
+boolean usePerlinNoiseToVarySamplingResolution = true;
 
 // Essentially, how drastically sampling resolution should change
 // Lower value (0.004) means sampling resolution changes less often
@@ -68,6 +68,7 @@ void setup() {
   verticalHues = new float[100];
   verticalSaturations = new float[100];
   verticalBrightnesses = new float[100];
+  
 }
 
 /*
