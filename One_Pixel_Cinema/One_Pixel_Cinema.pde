@@ -16,7 +16,7 @@ float perlinVerticalPosition = perlinVerticalStart; // Current position on horiz
  */
 
 // What type of rectangles to show
-boolean showHorizontalBars = false;
+boolean showHorizontalBars = true;
 boolean showVerticalBars = true;
 
 // Whether to show sampling points (helps to understand what's going on here...)
@@ -28,8 +28,8 @@ float horizontalOpacity = 5;
 float verticalOpacity = 5;
 
 // Divisions (number of sample points, or rows that will be sampled)
-int verticalDivisions = 15;
-int horizontalDivisions = 15;
+int verticalDivisions = 15; // for horizontal sampling
+int horizontalDivisions = 15; // for vertical sampling
 
 // Whether to use Perlin noise to vary sampling resolution
 boolean usePerlinNoiseToVaryHorizontalSamplingResolution = false;
@@ -39,7 +39,7 @@ boolean usePerlinNoiseToVaryVerticalSamplingResolution = false;
 // Lower value (0.004) means sampling resolution changes less often
 // Higher value (0.01) means sampling resolution changes more often
 float perlinHorizontalIncrement = 0.004; // for horizontal sampling
-float perlinVerticalIncrement = 0.010; // for vertical sampling
+float perlinVerticalIncrement = 0.004; // for vertical sampling
 
 /*
  * RUNS ONCE
