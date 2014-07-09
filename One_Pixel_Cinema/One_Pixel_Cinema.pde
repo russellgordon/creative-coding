@@ -14,14 +14,14 @@ float perlinVerticalPosition = perlinVerticalStart; // Current position on horiz
 /*
  * SETTINGS: Vary the flags and values below to change output
  */
- 
+
+// What type of rectangles to show
+boolean showHorizontalBars = false;
+boolean showVerticalBars = true;
+
 // Whether to show sampling points (helps to understand what's going on here...)
 boolean showHorizontalSamplingPoints = true;
 boolean showVerticalSamplingPoints = true;
-
-// What type of rectangles to show
-boolean showHorizontalBars = true;
-boolean showVerticalBars = true;
 
 // Opacity of rectangles
 float horizontalOpacity = 5;
@@ -39,7 +39,7 @@ boolean usePerlinNoiseToVaryVerticalSamplingResolution = false;
 // Lower value (0.004) means sampling resolution changes less often
 // Higher value (0.01) means sampling resolution changes more often
 float perlinHorizontalIncrement = 0.004; // for horizontal sampling
-float perlinYIncrement = 0.010; // for vertical sampling
+float perlinVerticalIncrement = 0.010; // for vertical sampling
 
 /*
  * RUNS ONCE
@@ -66,9 +66,46 @@ void draw() {
 
   // Move sampling points
   if (showVerticalBars) {
+
+    // Move sampling points
     y++;
+
+    // Reset at bottom edge
     if (y > height) {
       y = 0;
+    }
+
+    // Select how many divisions to have
+    if (usePerlinNoiseToVaryVerticalSamplingResolution) {
+      perlinVerticalPosition += perlinVerticalIncrement;
+      float noiseValue = noise(perlinVerticalPosition);
+      horizontalDivisions = (int) map(noiseValue, 0, 1, 10, 20);
+    }
+
+    // Sample vertically in columns (however many divisions is set to)
+    for (int i = 0; i < horizontalDivisions; i++) {
+
+      // Get color from sampling position
+      int horizontalDistance = ((width/2)/horizontalDivisions); // number of pixels, horizontally, between each sampling line
+      int offset = horizontalDistance / 2;
+      int horizontalPosition = horizontalDistance*i+offset;
+
+      // Show sampling positions with an ellipse
+      if (showVerticalSamplingPoints) {
+        strokeWeight(1);
+        stroke(255);
+        noFill();
+        ellipse(horizontalPosition, y, 1, 1);
+        ellipse(horizontalPosition, y, 25, 25);
+      } 
+
+      // Draw vertical rectangles on right side of screen
+      noStroke();
+      int index = horizontalPosition+y*(width/2);
+      if (index < workingImage.pixels.length) { 
+        fill(workingImage.pixels[horizontalPosition+y*(width/2)], horizontalOpacity); // Changing final argument (opacity) drastically changes output
+      }
+      rect(horizontalDistance*i + width/2, 0, horizontalDistance, height);
     }
   }
 
@@ -76,6 +113,11 @@ void draw() {
 
     // Move sampling points
     x++;
+
+    // Reset at right edge
+    if (x > width / 2) {
+      x = 0;
+    }
 
     // Select how many divisions to have
     if (usePerlinNoiseToVaryHorizontalSamplingResolution) {
@@ -101,15 +143,10 @@ void draw() {
         ellipse(x, verticalPosition, 25, 25);
       } 
 
-      // Draw rectangles on right side of screen
+      // Draw horizontal rectangles on right side of screen
       noStroke();
       fill(workingImage.pixels[x+(verticalPosition)*width/2], horizontalOpacity); // Changing final argument (opacity) drastically changes output
       rect(width/2, verticalDistance*i, width, verticalDistance);
-    }
-
-    // Reset at edges
-    if (x > width / 2) {
-      x = 0;
     }
   }
 }
