@@ -15,21 +15,25 @@ float perlinVerticalPosition = perlinVerticalStart; // Current position on horiz
  * SETTINGS: Vary the flags and values below to change output
  */
 
-// What type of rectangles to show
+// Where to show shapes at right side of screen
 boolean showHorizontalBars = true;
 boolean showVerticalBars = true;
 
 // Whether to show sampling points (helps to understand what's going on here...)
-boolean showHorizontalSamplingPoints = true;
-boolean showVerticalSamplingPoints = true;
+boolean showHorizontalSamplingPoints = false;
+boolean showVerticalSamplingPoints = false;
 
 // Opacity of rectangles
 float horizontalOpacity = 5;
 float verticalOpacity = 5;
 
 // Divisions (number of sample points, or rows that will be sampled)
-int verticalDivisions = 10; // for horizontal sampling, at least 2 required
-int horizontalDivisions = 10; // for vertical sampling, at least 2 required
+int verticalDivisions = 20; // for horizontal sampling, at least 2 required
+int horizontalDivisions = 20; // for vertical sampling, at least 2 required
+
+// What type of shape to draw with
+boolean horizontalRectangle = false; // for horizontal sampling: rectangles when true, ellipses when false
+boolean verticalRectangle = false; // for vertical sampling: rectangles when true, ellipses when false
 
 // Whether to use Perlin noise to vary sampling resolution
 boolean usePerlinNoiseToVaryHorizontalSamplingResolution = false;
@@ -45,7 +49,6 @@ float perlinVerticalIncrement = 0.004; // for vertical sampling
 float perlinVerticalDivisionsMaximum = 20; // for horizontal sampling
 float perlinHorizontalDivisionsMaximum = 20; // for vertical sampling
 
-
 /*
  * RUNS ONCE
  */
@@ -53,6 +56,9 @@ void setup() {
 
   // create a canvas (702 pixels wide and 526 pixels high)
   size(1200, 600);
+
+  // White background
+  background(255);
 
   // Load the picture file into the image object
   workingImage = loadImage("philosophers_walk.JPG");
@@ -103,13 +109,18 @@ void draw() {
         ellipse(x, verticalPosition, 25, 25);
       } 
 
-      // Draw horizontal rectangles on right side of screen
+      // Draw images on the right side of the screen based on samples from left
       noStroke();
       fill(workingImage.pixels[x+(verticalPosition)*width/2], horizontalOpacity); // Changing final argument (opacity) drastically changes output
-      rect(width/2, verticalDistance*i, width, verticalDistance);
+      if (horizontalRectangle) {
+        rect(width/2, verticalDistance*i, width, verticalDistance);
+      } else {
+        float diameter = map(brightness(workingImage.pixels[x+(verticalPosition)*width/2]), 0, 255, 5, verticalDistance);
+        ellipse(x+width/2, verticalPosition, diameter, diameter);
+      }
     }
   }
-  
+
   // Move sampling points
   if (showVerticalBars) {
 
@@ -145,14 +156,18 @@ void draw() {
         ellipse(horizontalPosition, y, 25, 25);
       } 
 
-      // Draw vertical rectangles on right side of screen
+      // Draw images on the right side of the screen based on samples from left
       noStroke();
       int index = horizontalPosition+y*(width/2);
       if (index < workingImage.pixels.length) { 
         fill(workingImage.pixels[horizontalPosition+y*(width/2)], horizontalOpacity); // Changing final argument (opacity) drastically changes output
+        if (verticalRectangle) {
+          rect(horizontalDistance*i + width/2, 0, horizontalDistance, height);
+        } else {
+          float diameter = map(brightness(workingImage.pixels[horizontalPosition+y*(width/2)]), 0, 255, 5, horizontalDistance);
+          ellipse(horizontalPosition + width/2, y, diameter, diameter);
+        }
       }
-      rect(horizontalDistance*i + width/2, 0, horizontalDistance, height);
     }
   }
-  
 }
