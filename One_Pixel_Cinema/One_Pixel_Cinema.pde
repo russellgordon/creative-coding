@@ -5,9 +5,6 @@ PImage workingImage;
 int x;
 int y;
 
-// divisions (number of sample points, or rows that will be sampled)
-int verticalDivisions = 10;
-
 // Make use of Perlin noise to vary the number of divisions
 float perlinHorizontalStart = random(0, 1000); // Starting point on horizontal axis in Perlin noise space for horizontal sampling
 float perlinHorizontalPosition = perlinHorizontalStart; // Current position on horizontal axis in Perlin noise space for horizontal sampling
@@ -29,6 +26,10 @@ boolean showVerticalBars = true;
 // Opacity of rectangles
 float horizontalOpacity = 5;
 float verticalOpacity = 5;
+
+// Divisions (number of sample points, or rows that will be sampled)
+int verticalDivisions = 15;
+int horizontalDivisions = 15;
 
 // Whether to use Perlin noise to vary sampling resolution
 boolean usePerlinNoiseToVaryHorizontalSamplingResolution = false;
@@ -81,8 +82,6 @@ void draw() {
       perlinHorizontalPosition += perlinHorizontalIncrement;
       float noiseValue = noise(perlinHorizontalPosition);
       verticalDivisions = (int) map(noiseValue, 0, 1, 10, 20);
-    } else {
-      verticalDivisions = 10;
     }
 
     // Sample horizontally in rows (however many divisions is set to)
