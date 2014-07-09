@@ -28,8 +28,8 @@ float horizontalOpacity = 5;
 float verticalOpacity = 5;
 
 // Divisions (number of sample points, or rows that will be sampled)
-int verticalDivisions = 15; // for horizontal sampling
-int horizontalDivisions = 15; // for vertical sampling
+int verticalDivisions = 10; // for horizontal sampling, at least 2 required
+int horizontalDivisions = 10; // for vertical sampling, at least 2 required
 
 // Whether to use Perlin noise to vary sampling resolution
 boolean usePerlinNoiseToVaryHorizontalSamplingResolution = false;
@@ -40,6 +40,11 @@ boolean usePerlinNoiseToVaryVerticalSamplingResolution = false;
 // Higher value (0.01) means sampling resolution changes more often
 float perlinHorizontalIncrement = 0.004; // for horizontal sampling
 float perlinVerticalIncrement = 0.004; // for vertical sampling
+
+// How wide a range of divisions should be allowed when using Perlin noise to vary sampling resolution
+float perlinVerticalDivisionsMaximum = 20; // for horizontal sampling
+float perlinHorizontalDivisionsMaximum = 20; // for vertical sampling
+
 
 /*
  * RUNS ONCE
@@ -64,6 +69,47 @@ void draw() {
   // Get access to pixels in image
   workingImage.loadPixels();
 
+  if (showHorizontalBars) {
+
+    // Move sampling points
+    x++;
+
+    // Reset at right edge
+    if (x > width / 2) {
+      x = 0;
+    }
+
+    // Select how many divisions to have
+    if (usePerlinNoiseToVaryHorizontalSamplingResolution) {
+      perlinHorizontalPosition += perlinHorizontalIncrement;
+      float noiseValue = noise(perlinHorizontalPosition);
+      verticalDivisions = (int) map(noiseValue, 0, 1, 2, perlinVerticalDivisionsMaximum);
+    }
+
+    // Sample horizontally in rows (however many divisions is set to)
+    for (int i = 0; i < verticalDivisions; i++) {
+
+      // Get color from sampling position
+      int verticalDistance = (height/verticalDivisions); // number of pixels, vertically, between each sampling line
+      int offset = verticalDistance / 2;
+      int verticalPosition = verticalDistance*i+offset;
+
+      // Show sampling positions with an ellipse
+      if (showHorizontalSamplingPoints) {
+        strokeWeight(1);
+        stroke(255);
+        noFill();
+        ellipse(x, verticalPosition, 1, 1);
+        ellipse(x, verticalPosition, 25, 25);
+      } 
+
+      // Draw horizontal rectangles on right side of screen
+      noStroke();
+      fill(workingImage.pixels[x+(verticalPosition)*width/2], horizontalOpacity); // Changing final argument (opacity) drastically changes output
+      rect(width/2, verticalDistance*i, width, verticalDistance);
+    }
+  }
+  
   // Move sampling points
   if (showVerticalBars) {
 
@@ -79,7 +125,7 @@ void draw() {
     if (usePerlinNoiseToVaryVerticalSamplingResolution) {
       perlinVerticalPosition += perlinVerticalIncrement;
       float noiseValue = noise(perlinVerticalPosition);
-      horizontalDivisions = (int) map(noiseValue, 0, 1, 10, 20);
+      horizontalDivisions = (int) map(noiseValue, 0, 1, 2, perlinHorizontalDivisionsMaximum);
     }
 
     // Sample vertically in columns (however many divisions is set to)
@@ -108,45 +154,5 @@ void draw() {
       rect(horizontalDistance*i + width/2, 0, horizontalDistance, height);
     }
   }
-
-  if (showHorizontalBars) {
-
-    // Move sampling points
-    x++;
-
-    // Reset at right edge
-    if (x > width / 2) {
-      x = 0;
-    }
-
-    // Select how many divisions to have
-    if (usePerlinNoiseToVaryHorizontalSamplingResolution) {
-      perlinHorizontalPosition += perlinHorizontalIncrement;
-      float noiseValue = noise(perlinHorizontalPosition);
-      verticalDivisions = (int) map(noiseValue, 0, 1, 10, 20);
-    }
-
-    // Sample horizontally in rows (however many divisions is set to)
-    for (int i = 0; i < verticalDivisions; i++) {
-
-      // Get color from sampling position
-      int verticalDistance = (height/verticalDivisions); // number of pixels, vertically, between each sampling line
-      int offset = verticalDistance / 2;
-      int verticalPosition = verticalDistance*i+offset;
-
-      // Show sampling positions with an ellipse
-      if (showHorizontalSamplingPoints) {
-        strokeWeight(1);
-        stroke(255);
-        noFill();
-        ellipse(x, verticalPosition, 1, 1);
-        ellipse(x, verticalPosition, 25, 25);
-      } 
-
-      // Draw horizontal rectangles on right side of screen
-      noStroke();
-      fill(workingImage.pixels[x+(verticalPosition)*width/2], horizontalOpacity); // Changing final argument (opacity) drastically changes output
-      rect(width/2, verticalDistance*i, width, verticalDistance);
-    }
-  }
+  
 }
