@@ -28,7 +28,7 @@ float horizontalOpacity = 5;
 float verticalOpacity = 5;
 
 // Divisions (number of sample points, or rows that will be sampled)
-int verticalDivisions = 20; // for horizontal sampling, at least 2 required
+int verticalDivisions = 1; // for horizontal sampling, at least 2 required
 int horizontalDivisions = 20; // for vertical sampling, at least 2 required
 
 // What type of shape to draw with
@@ -36,8 +36,8 @@ boolean horizontalRectangle = false; // for horizontal sampling: rectangles when
 boolean verticalRectangle = false; // for vertical sampling: rectangles when true, ellipses when false
 
 // Whether to use Perlin noise to vary sampling resolution
-boolean usePerlinNoiseToVaryHorizontalSamplingResolution = true;
-boolean usePerlinNoiseToVaryVerticalSamplingResolution = true;
+boolean usePerlinNoiseToVaryHorizontalSamplingResolution = false;
+boolean usePerlinNoiseToVaryVerticalSamplingResolution = false;
 
 // Essentially, how drastically sampling resolution should change
 // Lower value (0.004) means sampling resolution changes less often
@@ -57,8 +57,11 @@ void setup() {
   // create a canvas
   size(1200, 600);
 
+  // Color mode
+  colorMode(HSB, 360, 100, 100, 100);
+
   // White background
-  background(255);
+  background(0, 0, 100);
 
   // Load the picture file into the image object
   workingImage = loadImage("philosophers_walk.JPG");
@@ -103,7 +106,7 @@ void draw() {
       // Show sampling positions with an ellipse
       if (showHorizontalSamplingPoints) {
         strokeWeight(1);
-        stroke(255);
+        stroke(0, 0, 100);
         noFill();
         ellipse(x, verticalPosition, 1, 1);
         ellipse(x, verticalPosition, 25, 25);
@@ -116,7 +119,7 @@ void draw() {
       if (horizontalRectangle) {
         rect(width/2, verticalDistance*i, width, verticalDistance);
       } else {
-        float diameter = map(brightness(workingImage.pixels[index]), 0, 255, 5, verticalDistance);
+        float diameter = map(brightness(workingImage.pixels[index]), 0, 100, 5, verticalDistance);
         ellipse(x+width/2, verticalPosition, diameter, diameter);
       }
     }
@@ -151,7 +154,7 @@ void draw() {
       // Show sampling positions with an ellipse
       if (showVerticalSamplingPoints) {
         strokeWeight(1);
-        stroke(255);
+        stroke(0, 0, 100);
         noFill();
         ellipse(horizontalPosition, y, 1, 1);
         ellipse(horizontalPosition, y, 25, 25);
@@ -165,7 +168,7 @@ void draw() {
         if (verticalRectangle) {
           rect(horizontalDistance*i + width/2, 0, horizontalDistance, height);
         } else {
-          float diameter = map(brightness(workingImage.pixels[index]), 0, 255, 5, horizontalDistance);
+          float diameter = map(brightness(workingImage.pixels[index]), 0, 100, 5, horizontalDistance);
           ellipse(horizontalPosition + width/2, y, diameter, diameter);
         }
       }
