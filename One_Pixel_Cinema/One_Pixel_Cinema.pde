@@ -17,7 +17,7 @@ float perlinVerticalPosition = perlinVerticalStart; // Current position on horiz
 
 // Where to show shapes at right side of screen
 boolean showHorizontalBars = true;
-boolean showVerticalBars = true;
+boolean showVerticalBars = false;
 
 // Whether to show sampling points (helps to understand what's going on here...)
 boolean showHorizontalSamplingPoints = false;
@@ -36,8 +36,8 @@ boolean horizontalRectangle = false; // for horizontal sampling: rectangles when
 boolean verticalRectangle = false; // for vertical sampling: rectangles when true, ellipses when false
 
 // Whether to use Perlin noise to vary sampling resolution
-boolean usePerlinNoiseToVaryHorizontalSamplingResolution = false;
-boolean usePerlinNoiseToVaryVerticalSamplingResolution = false;
+boolean usePerlinNoiseToVaryHorizontalSamplingResolution = true;
+boolean usePerlinNoiseToVaryVerticalSamplingResolution = true;
 
 // Essentially, how drastically sampling resolution should change
 // Lower value (0.004) means sampling resolution changes less often
@@ -47,14 +47,14 @@ float perlinVerticalIncrement = 0.004; // for vertical sampling
 
 // How wide a range of divisions should be allowed when using Perlin noise to vary sampling resolution
 float perlinVerticalDivisionsMaximum = 20; // for horizontal sampling
-float perlinHorizontalDivisionsMaximum = 20; // for vertical sampling
+float perlinHorizontalDivisionsMaximum = 50; // for vertical sampling
 
 /*
  * RUNS ONCE
  */
 void setup() {
 
-  // create a canvas (702 pixels wide and 526 pixels high)
+  // create a canvas
   size(1200, 600);
 
   // White background
@@ -111,11 +111,12 @@ void draw() {
 
       // Draw images on the right side of the screen based on samples from left
       noStroke();
-      fill(workingImage.pixels[x+(verticalPosition)*width/2], horizontalOpacity); // Changing final argument (opacity) drastically changes output
+      int index = x+(verticalPosition)*width/2;
+      fill(workingImage.pixels[index], horizontalOpacity); // Changing final argument (opacity) drastically changes output
       if (horizontalRectangle) {
         rect(width/2, verticalDistance*i, width, verticalDistance);
       } else {
-        float diameter = map(brightness(workingImage.pixels[x+(verticalPosition)*width/2]), 0, 255, 5, verticalDistance);
+        float diameter = map(brightness(workingImage.pixels[index]), 0, 255, 5, verticalDistance);
         ellipse(x+width/2, verticalPosition, diameter, diameter);
       }
     }
@@ -160,11 +161,11 @@ void draw() {
       noStroke();
       int index = horizontalPosition+y*(width/2);
       if (index < workingImage.pixels.length) { 
-        fill(workingImage.pixels[horizontalPosition+y*(width/2)], horizontalOpacity); // Changing final argument (opacity) drastically changes output
+        fill(workingImage.pixels[index], horizontalOpacity); // Changing final argument (opacity) drastically changes output
         if (verticalRectangle) {
           rect(horizontalDistance*i + width/2, 0, horizontalDistance, height);
         } else {
-          float diameter = map(brightness(workingImage.pixels[horizontalPosition+y*(width/2)]), 0, 255, 5, horizontalDistance);
+          float diameter = map(brightness(workingImage.pixels[index]), 0, 255, 5, horizontalDistance);
           ellipse(horizontalPosition + width/2, y, diameter, diameter);
         }
       }
