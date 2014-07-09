@@ -5,8 +5,8 @@ PImage workingImage;
 int x;
 int y;
 
-// divisions (number of sample points)
-int divisions = 10;
+// divisions (number of sample points, or rows that will be sampled)
+int verticalDivisions = 10;
 
 // This code is run once
 void setup() {
@@ -32,17 +32,15 @@ void draw() {
   y++;
   
   // Sample vertically (however many divisions is set to)
-  for (int i = 0; i < divisions; i++) {
+  for (int i = 0; i < verticalDivisions; i++) {
     
     // Get color from sampling position
-    int verticalDistance = (height/divisions); // number of pixels, vertically, between each sampling line
+    int verticalDistance = (height/verticalDivisions); // number of pixels, vertically, between each sampling line
     int offset = verticalDistance / 2;
     int verticalPosition = verticalDistance*i+offset;
     if (i == 0) {
       println(x+(verticalPosition)*width/2);
     }
-    //color colorValue = workingImage.pixels[x+(verticalPosition)*width];
-    //color colorValue = color(0, 0, 0);
     
     // Show sampling positions with an ellipse
     strokeWeight(1);
@@ -53,7 +51,6 @@ void draw() {
     
     // Draw rectangles on right side of screen
     noStroke();
-    //fill(colorValue);
     fill(workingImage.pixels[x+(verticalPosition)*width/2], 10);
     rect(width/2, verticalDistance*i, width, verticalDistance);
   }
