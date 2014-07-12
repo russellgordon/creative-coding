@@ -37,8 +37,6 @@ float[] circleY = new float[circles];
 float[] diameter = new float[circles];
 
 // Variables to track movement of circles
-float[] dX = new float[circles];
-float[] dY = new float[circles];
 float[] direction = new float[circles];
 
 // Initial length of vector
@@ -53,19 +51,34 @@ void setup() {
   // Color mode
   colorMode(HSB, 360, 100, 100, 100);
 
-  // Set initial positions and sizes of circles
+  // Set initial positions, sizes of circles, and direction of circles
   for (int i = 0; i < circles; i ++) {
     diameter[i] = random(100, 300);
     circleX[i] = random(0 + diameter[i], width - diameter[i]);
-    circleY[i] = random(0 + diameter[i], width - diameter[i]);
+    circleY[i] = random(0 + diameter[i], height - diameter[i]);
+    direction[i] = random(0, 360);
   }
+  
+  direction[0] = 300;
+
+  // Use a proper Cartesian co-ordinate system with origin in lower left
+  translate(0, height);
+  scale(1, -1);
 
   // Draw circles at initial positions
   drawCircles();
+  
 }
 
 // This runs repeatedly
 void draw() {
+
+  // Use a proper Cartesian co-ordinate system with origin in lower left
+  translate(0, height);
+  scale(1, -1);
+  
+  // Update position of circles
+  drawCircles();
 }
 
 // drawCircles
@@ -83,6 +96,27 @@ void drawCircles() {
 
   // Draw the circles and their centre points
   for (int i = 0; i < circles; i++) {
+    
+    // Determine new position
+    float dX = cos(radians(direction[i]))*velocity;
+    float dY = sin(radians(direction[i]))*velocity;
+    
+    // Right boundary and left boundary check
+    if ( ((circleX[i] + dX) > (width - diameter[i]/2)) || ((circleX[i] + dX) < diameter[i]/2)) {
+      direction[i] = 180 - direction[i]; // reflection in vertical axis
+      dX = cos(radians(direction[i]))*velocity;
+    }
+    // Top boundary and lower boundary check
+    if ( ((circleY[i] + dY) > (height - diameter[i]/2)) || ((circleY[i] + dY) < diameter[i]/2)) {
+      direction[i] = 360 - direction[i]; // reflection in horizontal axis
+      dY = sin(radians(direction[i]))*velocity;
+    }
+
+    // Update position
+    circleX[i] += dX;
+    circleY[i] += dY;
+    
+    // Draw the circles in new position
     stroke(i*120, 80, 90);
     ellipse(circleX[i], circleY[i], diameter[i], diameter[i]);
     point(circleX[i], circleY[i]);
