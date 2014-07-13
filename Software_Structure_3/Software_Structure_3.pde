@@ -42,6 +42,9 @@ float[] direction = new float[circles];
 // Initial length of vector
 float velocity = random(0.5, 1);
 
+// Whether to show what's going on
+boolean debug = false;
+
 // This runs once.
 void setup() {
 
@@ -59,26 +62,12 @@ void setup() {
     direction[i] = random(0, 360);
   }
 
-  //  direction[0] = 0;
-  //  direction[1] = 180;
-  //  circleY[0] = height/2;
-  //  circleY[1] = height/2;
-  //  frameRate(1);
-
-  // Use a proper Cartesian co-ordinate system with origin in lower left
-  //  translate(0, height);
-  //  scale(1, -1);
-
   // Draw circles at initial positions
   drawCircles();
 }
 
 // This runs repeatedly
 void draw() {
-
-  // Use a proper Cartesian co-ordinate system with origin in lower left
-  //  translate(0, height);
-  //  scale(1, -1);
 
   // Update position of circles
   drawCircles();
@@ -120,103 +109,22 @@ void drawCircles() {
     circleY[i] += dY;
 
     // Draw the circles in new position
-    noFill();
-    stroke(i*120, 80, 90);
-    ellipse(circleX[i], circleY[i], diameter[i], diameter[i]);
-    point(circleX[i], circleY[i]);
+    if (debug) {
+      noFill();
+      stroke(i*120, 80, 90);
+      ellipse(circleX[i], circleY[i], diameter[i], diameter[i]);
+      point(circleX[i], circleY[i]);
+    }
 
-    // Draw a line between the circles when they overlap
-    if ((i > 0) && (dist(circleX[i], circleY[i], circleX[i - 1], circleY[i - 1]) < (diameter[i]/2 + diameter[i-1]/2)) ) {
+    // Determine whether circles are overlapping, if so, draw points where they intersect
+    if ((i > 0) && circlesOverlapping(i, i - 1) ) {
 
-      // Reference: http://mathforum.org/library/drmath/view/51710.html
-      // The Dr. George suggestion, at bottom of page.
-      PVector C1 = new PVector(circleX[i], circleY[i]);      // Centre of circle 1
-      PVector C2 = new PVector(circleX[i-1], circleY[i-1]);  // Centre of cirlce 2
-      PVector V1 = new PVector();
-      V1 = C1.get();
-      V1.sub(C2);                                            
-      line(C1.x, C1.y, C1.x - V1.x, C1.y - V1.y); // line between centres
-      V1.normalize(); // Creates a unit vector from C1 to C2
-      stroke(10);
-      V1.mult(50);
-      line(C1.x, C1.y, C1.x - V1.x, C1.y - V1.y); // line between centres
-      V1.normalize();
-      PVector V2 = new PVector(-1*V1.y, V1.x); // get vector perpendicular to V1
-      line(C1.x, C1.y, C1.x - V2.x, C1.y - V2.y); // perpendicular to line between centres
-      V2.mult(50);
-      line(C1.x, C1.y, C1.x - V2.x, C1.y - V2.y); // perpendicular to line between centres
-      V2.normalize();
-      // If a vector V3 is from C1 to one of the circle intersection points... calculate A,
-      // the angle between those vectors
-      // see hand drawn sketch at: http://russellgordon.ca/doodles/two-circles-intersection-diagram.jpg
-      float R1 = diameter[i] / 2;
-      float R2 = diameter[i - 1] / 2;
-      float d = C1.dist(C2);
-      float A = acos( (pow(R2, 2) - pow(R1, 2) - pow(d, 2) ) / ( -2*R1*d )  );
-      A = PI - A;
+      // Draw ellipses at the point where these two circles overlap
+      drawIntersections(i, i - 1);
+    } else if ((i == 0) && circlesOverlapping(i, circles - 1) ) {
 
-      // first intersection point
-      PVector I1 = PVector.mult(V1, R1*cos(A));
-      I1.add(PVector.mult(V2, R1*sin(A)));
-      I1 = PVector.add(C1, I1);
-      stroke(2);
-      fill(0, 0, 0);
-      ellipse(I1.x, I1.y, 2, 2);
-      //      popMatrix();
-
-      // second intersection point
-      PVector I2 = PVector.mult(V1, R1*cos(A));
-      I2.sub(PVector.mult(V2, R1*sin(A)));
-      I2 = PVector.add(C1, I2);
-      stroke(2);
-      fill(0, 0, 0);
-      ellipse(I2.x, I2.y, 2, 2);
-
-    } else if ((i == 0) && (dist(circleX[i], circleY[i], circleX[circles - 1], circleY[circles - 1]) < (diameter[i]/2 + diameter[circles - 1]/2)) ) {
-
-      // Reference: http://mathforum.org/library/drmath/view/51710.html
-      // The Dr. George suggestion, at bottom of page.
-      PVector C1 = new PVector(circleX[i], circleY[i]);      // Centre of circle 1
-      PVector C2 = new PVector(circleX[circles - 1], circleY[circles - 1]);  // Centre of cirlce 2
-      PVector V1 = new PVector();
-      V1 = C1.get();
-      V1.sub(C2);                                            
-      line(C1.x, C1.y, C1.x - V1.x, C1.y - V1.y); // line between centres
-      V1.normalize(); // Creates a unit vector from C1 to C2
-      stroke(10);
-      V1.mult(50);
-      line(C1.x, C1.y, C1.x - V1.x, C1.y - V1.y); // line between centres
-      V1.normalize();
-      PVector V2 = new PVector(-1*V1.y, V1.x); // get vector perpendicular to V1
-      line(C1.x, C1.y, C1.x - V2.x, C1.y - V2.y); // perpendicular to line between centres
-      V2.mult(50);
-      line(C1.x, C1.y, C1.x - V2.x, C1.y - V2.y); // perpendicular to line between centres
-      V2.normalize();
-      // If a vector V3 is from C1 to one of the circle intersection points... calculate A,
-      // the angle between those vectors
-      // see hand drawn sketch at: http://russellgordon.ca/doodles/two-circles-intersection-diagram.jpg
-      float R1 = diameter[i] / 2;
-      float R2 = diameter[circles - 1] / 2;
-      float d = C1.dist(C2);
-      float A = acos( (pow(R2, 2) - pow(R1, 2) - pow(d, 2) ) / ( -2*R1*d )  );
-      A = PI - A;
-
-      // first intersection point
-      PVector I1 = PVector.mult(V1, R1*cos(A));
-      I1.add(PVector.mult(V2, R1*sin(A)));
-      I1 = PVector.add(C1, I1);
-      stroke(2);
-      fill(0, 0, 0);
-      ellipse(I1.x, I1.y, 2, 2);
-      //      popMatrix();
-
-      // second intersection point
-      PVector I2 = PVector.mult(V1, R1*cos(A));
-      I2.sub(PVector.mult(V2, R1*sin(A)));
-      I2 = PVector.add(C1, I2);
-      stroke(2);
-      fill(0, 0, 0);
-      ellipse(I2.x, I2.y, 2, 2);
+      // Draw ellipses at the point where these two circles overlap
+      drawIntersections(i, circles - 1);
     }
   }
 }
@@ -231,4 +139,84 @@ void keyPressed() {
   if (key == 'r') {
     setup();
   }
+}
+
+// circlesOverlapping
+// 
+// Purpose: Determines whether two given circles are overlapping.
+//
+// Parameters:       a      index of first circle in the arrays that, put together, represent the circles
+//                   b      index of second circle in the arrays that, put together, represent the circles
+//
+// Returns: true if they are
+//
+boolean circlesOverlapping(int a, int b) {
+
+  return dist(circleX[a], circleY[a], circleX[b], circleY[b]) < (diameter[a]/2 + diameter[b]/2);
+}
+
+// drawIntersections
+//
+// Purpose: Given two circles that are overlapping, draw their intersection points
+//
+// Parameters:       a      index of first circle in the arrays that, put together, represent the circles
+//                   b      index of second circle in the arrays that, put together, represent the circles
+//
+// Returns:          null
+//
+void drawIntersections(int a, int b) {
+
+  // Reference: http://mathforum.org/library/drmath/view/51710.html
+  // The Dr. George suggestion, at bottom of page.
+  PVector C1 = new PVector(circleX[a], circleY[a]);      // Centre of circle 1
+  PVector C2 = new PVector(circleX[b], circleY[b]);  // Centre of cirlce 2
+
+  // Creates a unit vector from C1 to C2
+  PVector V1 = new PVector();
+  V1 = C1.get();
+  V1.sub(C2);
+  if (debug) {
+    line(C1.x, C1.y, C1.x - V1.x, C1.y - V1.y); // line between centres
+  }
+  V1.normalize(); // make unit vector
+  if (debug) {
+    stroke(10);
+    V1.mult(50);
+    line(C1.x, C1.y, C1.x - V1.x, C1.y - V1.y); // line between centres
+    V1.normalize();
+  }
+
+  // Get vector perpendicular to V1
+  PVector V2 = new PVector(-1*V1.y, V1.x);
+  if (debug) {
+    line(C1.x, C1.y, C1.x - V2.x, C1.y - V2.y); // perpendicular to line between centres
+    V2.mult(50);
+    line(C1.x, C1.y, C1.x - V2.x, C1.y - V2.y); // perpendicular to line between centres
+    V2.normalize();
+  }
+  
+  // If a vector V3 is from C1 to one of the circle intersection points... calculate A,
+  // the angle between those vectors
+  // see hand drawn sketch at: http://russellgordon.ca/doodles/two-circles-intersection-diagram.jpg
+  float R1 = diameter[a] / 2;
+  float R2 = diameter[b] / 2;
+  float d = C1.dist(C2);
+  float A = acos( (pow(R2, 2) - pow(R1, 2) - pow(d, 2) ) / ( -2*R1*d )  );
+  A = PI - A;
+
+  // first intersection point
+  PVector I1 = PVector.mult(V1, R1*cos(A));
+  I1.add(PVector.mult(V2, R1*sin(A)));
+  I1 = PVector.add(C1, I1);
+  stroke(2);
+  fill(0, 0, 0);
+  ellipse(I1.x, I1.y, 2, 2);
+
+  // second intersection point
+  PVector I2 = PVector.mult(V1, R1*cos(A));
+  I2.sub(PVector.mult(V2, R1*sin(A)));
+  I2 = PVector.add(C1, I2);
+  stroke(2);
+  fill(0, 0, 0);
+  ellipse(I2.x, I2.y, 2, 2);
 }
