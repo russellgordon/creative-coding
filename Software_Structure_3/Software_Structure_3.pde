@@ -31,7 +31,7 @@
  */
 
 // Variables to track number and location of circles
-int circles = 3;
+int circles = 100;
 float[] circleX = new float[circles]; 
 float[] circleY = new float[circles];
 float[] diameter = new float[circles];
@@ -80,7 +80,13 @@ void draw() {
 void drawCircles() {
 
   // Erase prior drawing
-  background(0, 0, 100);
+  if (debug) {
+    fill(0, 0, 100, 100);
+  } else {
+    fill(0, 0, 100, 5);
+  }
+  noStroke();
+  rect(0, 0, width, height);
 
   // Set visual attributes
   strokeWeight(1);
@@ -111,7 +117,7 @@ void drawCircles() {
     // Draw the circles in new position
     if (debug) {
       noFill();
-      stroke(i*120, 80, 90);
+      stroke((i*3) % 360, 80, 90);
       ellipse(circleX[i], circleY[i], diameter[i], diameter[i]);
       point(circleX[i], circleY[i]);
     }
