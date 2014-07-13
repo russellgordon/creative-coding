@@ -31,7 +31,7 @@
  */
 
 // Variables to track number and location of circles
-int circles = 100;
+int circles = 20;
 float[] circleX = new float[circles]; 
 float[] circleY = new float[circles];
 float[] diameter = new float[circles];
@@ -43,7 +43,12 @@ float[] direction = new float[circles];
 float velocity = random(0.5, 1);
 
 // Whether to show what's going on
-boolean debug = false;
+boolean drawCircles = false;
+boolean drawVectors = false;
+boolean drawIntersections = false;
+
+// Whether to show only the current intersections or create a fade effect
+boolean aggregate = true;
 
 // This runs once.
 void setup() {
@@ -80,10 +85,10 @@ void draw() {
 void drawCircles() {
 
   // Erase prior drawing
-  if (debug) {
-    fill(0, 0, 100, 100);
-  } else {
+  if (aggregate) {
     fill(0, 0, 100, 5);
+  } else {
+    fill(0, 0, 100, 100);
   }
   noStroke();
   rect(0, 0, width, height);
@@ -115,22 +120,25 @@ void drawCircles() {
     circleY[i] += dY;
 
     // Draw the circles in new position
-    if (debug) {
+    if (drawCircles) {
       noFill();
       stroke((i*3) % 360, 80, 90);
       ellipse(circleX[i], circleY[i], diameter[i], diameter[i]);
-      point(circleX[i], circleY[i]);
     }
 
     // Determine whether circles are overlapping, if so, draw points where they intersect
-    if ((i > 0) && circlesOverlapping(i, i - 1) ) {
+    for (int j = 0; j < circles; j++) {
+      if (j == i) {
+        // Don't check circle we're currently on
+        continue;
+      } else if ((j > 0) && circlesOverlapping(j, i) ) {
+        // Draw ellipses at the point where these two circles overlap
+        drawIntersections(j, i);
+      } else if ((j == 0) && circlesOverlapping(j, circles - 1) ) {
 
-      // Draw ellipses at the point where these two circles overlap
-      drawIntersections(i, i - 1);
-    } else if ((i == 0) && circlesOverlapping(i, circles - 1) ) {
-
-      // Draw ellipses at the point where these two circles overlap
-      drawIntersections(i, circles - 1);
+        // Draw ellipses at the point where these two circles overlap
+        drawIntersections(j, circles - 1);
+      }
     }
   }
 }
@@ -144,6 +152,15 @@ void keyPressed() {
   // Reset the sketch when the 'r' key is pressed
   if (key == 'r') {
     setup();
+  }
+
+  if (key == 'a') {
+
+    if (aggregate) {
+      aggregate = false;
+    } else {
+      aggregate = true;
+    }
   }
 }
 
@@ -181,11 +198,11 @@ void drawIntersections(int a, int b) {
   PVector V1 = new PVector();
   V1 = C1.get();
   V1.sub(C2);
-  if (debug) {
+  if (drawVectors) {
     line(C1.x, C1.y, C1.x - V1.x, C1.y - V1.y); // line between centres
   }
   V1.normalize(); // make unit vector
-  if (debug) {
+  if (drawVectors) {
     stroke(10);
     V1.mult(50);
     line(C1.x, C1.y, C1.x - V1.x, C1.y - V1.y); // line between centres
@@ -194,13 +211,13 @@ void drawIntersections(int a, int b) {
 
   // Get vector perpendicular to V1
   PVector V2 = new PVector(-1*V1.y, V1.x);
-  if (debug) {
+  if (drawVectors) {
     line(C1.x, C1.y, C1.x - V2.x, C1.y - V2.y); // perpendicular to line between centres
     V2.mult(50);
     line(C1.x, C1.y, C1.x - V2.x, C1.y - V2.y); // perpendicular to line between centres
     V2.normalize();
   }
-  
+
   // If a vector V3 is from C1 to one of the circle intersection points... calculate A,
   // the angle between those vectors
   // see hand drawn sketch at: http://russellgordon.ca/doodles/two-circles-intersection-diagram.jpg
@@ -214,15 +231,31 @@ void drawIntersections(int a, int b) {
   PVector I1 = PVector.mult(V1, R1*cos(A));
   I1.add(PVector.mult(V2, R1*sin(A)));
   I1 = PVector.add(C1, I1);
-  stroke(2);
-  fill(0, 0, 0);
-  ellipse(I1.x, I1.y, 2, 2);
+  if (drawIntersections) {
+    stroke(2);
+    fill(0, 0, 0);
+    ellipse(I1.x, I1.y, 2, 2);
+  }
 
   // second intersection point
   PVector I2 = PVector.mult(V1, R1*cos(A));
   I2.sub(PVector.mult(V2, R1*sin(A)));
   I2 = PVector.add(C1, I2);
-  stroke(2);
-  fill(0, 0, 0);
-  ellipse(I2.x, I2.y, 2, 2);
+  if (drawIntersections) {
+    stroke(2);
+    fill(0, 0, 0);
+    ellipse(I2.x, I2.y, 2, 2);
+  }
+
+  // Draw a line connecting the intersection points per rules at:
+  // http://artport.whitney.org/commissions/softwarestructures/text.html#structure (#3)
+  strokeWeight(1);
+  float opacity = 100;
+  if (aggregate) {
+    opacity = map(I1.dist(I2), 0, 2400, 0, 100);
+  } else {
+    opacity = map(I1.dist(I2), 0, 400, 0, 100);
+  }
+  stroke(0, 0, 0, opacity);
+  line(I1.x, I1.y, I2.x, I2.y);
 }
